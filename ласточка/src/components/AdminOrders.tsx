@@ -206,7 +206,8 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                     token,
                     supabaseConfig: {
                         url: config.url,
-                        anonKey: config.anonKey || config.secretKey,
+                        anonKey: config.anonKey,
+                        secretKey: config.secretKey,
                         tableName: config.tableName
                     }
                 })
@@ -243,7 +244,8 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                     token,
                     supabaseConfig: {
                         url: config.url,
-                        anonKey: config.anonKey || config.secretKey,
+                        anonKey: config.anonKey,
+                        secretKey: config.secretKey,
                         tableName: config.tableName
                     }
                 })

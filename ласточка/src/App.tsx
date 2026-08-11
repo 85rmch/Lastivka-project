@@ -519,7 +519,8 @@ export default function App() {
           total: total,
           supabaseConfig: {
             url: config.url,
-            anonKey: config.anonKey || config.secretKey,
+            anonKey: config.anonKey,
+            secretKey: config.secretKey,
             tableName: config.tableName
           }
         })

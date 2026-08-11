@@ -253,7 +253,7 @@ router.post("/api/telegram/order", async (req, res) => {
     // Save order to Supabase table if config is available on the server or passed by the client
     const config = getServerConfig();
     const supabaseUrl = config.url || supabaseConfig?.url || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-    const supabaseKey = config.secretKey || config.anonKey || supabaseConfig?.anonKey || process.env.VITE_SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
+    const supabaseKey = config.secretKey || supabaseConfig?.secretKey || config.anonKey || supabaseConfig?.anonKey || process.env.VITE_SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
     let dbSuccess = true;
     let dbErrorMessage: string | null = null;
 
@@ -760,7 +760,7 @@ router.post("/api/orders/update", async (req, res) => {
     const { orderId, status, adminPassword, token, supabaseConfig } = req.body;
     const config = getServerConfig();
     const supabaseUrl = config.url || supabaseConfig?.url || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-    const supabaseKey = config.secretKey || config.anonKey || supabaseConfig?.anonKey || process.env.VITE_SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
+    const supabaseKey = config.secretKey || supabaseConfig?.secretKey || config.anonKey || supabaseConfig?.anonKey || process.env.VITE_SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       return res.status(400).json({ error: "Missing Supabase connection details on the server. Please configure Supabase in Admin Panel settings." });
@@ -838,7 +838,7 @@ router.post("/api/orders/list", async (req, res) => {
     const { adminPassword, token, supabaseConfig } = req.body;
     const config = getServerConfig();
     const supabaseUrl = config.url || supabaseConfig?.url || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-    const supabaseKey = config.secretKey || config.anonKey || supabaseConfig?.anonKey || process.env.VITE_SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
+    const supabaseKey = config.secretKey || supabaseConfig?.secretKey || config.anonKey || supabaseConfig?.anonKey || process.env.VITE_SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
       return res.status(400).json({ error: "Missing Supabase connection details on the server. Please configure Supabase in Admin Panel settings." });

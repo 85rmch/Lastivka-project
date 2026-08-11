@@ -866,15 +866,21 @@ create policy "Allow public update access on orders" on orders for update using 
                     </div>
 
                     {showKeys && (
-                    <div className="p-3 bg-[#121212] rounded-lg border border-white/10 text-xs text-[#a19992] font-mono flex flex-col gap-1">
+                    <div className="p-3 bg-[#121212] rounded-lg border border-white/10 text-xs text-[#a19992] font-mono flex flex-col gap-2">
                         <span className="font-semibold text-white">
-                          {lang === 'ru' ? 'Секретный ключ (sb_secret):' : 'Секретний ключ (sb_secret):'}
+                          {lang === 'ru' ? 'Секретный ключ (Service Role Key):' : 'Секретний ключ (Service Role Key):'}
                         </span>
-                        <span className="break-all">{secretKey}</span>
+                        <input
+                          type={showKeys ? "text" : "password"}
+                          value={secretKey}
+                          onChange={e => setSecretKey(e.target.value)}
+                          placeholder="eyJhbGciOiJIUzI1NiIsIn..."
+                          className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs focus:outline-none focus:border-[#d4af37] transition-all font-mono"
+                        />
                         <span className="text-[10px] text-[#6b645d] mt-1">
                         {lang === 'ru' 
-                          ? '* Данный ключ используется во внутренних API запросах и не передается сторонним сервисам.' 
-                          : '* Даний ключ використовується у внутрішніх API запитах і не передається стороннім сервісам.'}
+                          ? '* Данный ключ используется для безопасных серверных операций (создание заказов, управление статусами) в обход ограничений политики RLS.' 
+                          : '* Даний ключ використовується для безпечних серверних операцій (створення замовлень, керування статусами) в обхід обмежень політики RLS.'}
                         </span>
                     </div>
                     )}

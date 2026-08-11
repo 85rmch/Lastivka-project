@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 120" width="500" height="120">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Marck+Script&amp;display=swap');
+      .logo-text {
+        font-family: 'Marck Script', cursive;
+        font-size: 92px;
+        fill: #e02484;
+      }
+    </style>
+  </defs>
+  <text x="10" y="94" class="logo-text">Ластівка</text>
+  <g transform="translate(385, 24) rotate(-18) scale(0.78)" fill="#1e1e1e">
+    <path d="M0,0 Q10,-2 18,2 Q28,-12 42,-32 Q38,-20 26,-2 Q36,10 48,22 L60,36 Q46,26 38,16 L48,30 Q28,14 18,10 Q12,22 0,28 Q10,16 12,6 Q4,2 0,0 Z" />
+  </g>
+  <g transform="translate(442, 48) rotate(-14) scale(0.58)" fill="#1e1e1e">
+    <path d="M0,0 Q10,-2 18,2 Q28,-12 42,-32 Q38,-20 26,-2 Q36,10 48,22 L60,36 Q46,26 38,16 L48,30 Q28,14 18,10 Q12,22 0,28 Q10,16 12,6 Q4,2 0,0 Z" />
+  </g>
+</svg>

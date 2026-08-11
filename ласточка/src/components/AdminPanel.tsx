@@ -792,42 +792,17 @@ create policy "Allow public update access on orders" on orders for update using 
 
           {activeTab === 'settings' && (
               <div className="space-y-6">
-                {/* Mode Switcher */}
-                <div className="p-4 bg-[#121212] rounded-xl border border-white/10">
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#6b645d] mb-3">{t.modeLabel}</label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <button
-                        type="button"
-                        onClick={() => setMode('demo')}
-                        className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                        mode === 'demo' 
-                            ? 'border-[#d4af37] bg-[#d4af37]/5 shadow-sm' 
-                            : 'border-white/10 hover:border-white/25 bg-[#161616]'
-                        }`}
-                    >
-                        <div className="flex items-center gap-2 font-semibold text-white">
-                        <Sparkles className={`w-4 h-4 ${mode === 'demo' ? 'text-[#d4af37]' : 'text-[#6b645d]'}`} />
-                        {t.demoMode}
-                        </div>
-                        <p className="text-xs text-[#a19992] mt-2 leading-relaxed">{t.demoDesc}</p>
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => setMode('supabase')}
-                        className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
-                        mode === 'supabase' 
-                            ? 'border-[#d4af37] bg-[#d4af37]/5 shadow-sm' 
-                            : 'border-white/10 hover:border-white/25 bg-[#161616]'
-                        }`}
-                    >
-                        <div className="flex items-center gap-2 font-semibold text-white">
-                        <Database className={`w-4 h-4 ${mode === 'supabase' ? 'text-[#d4af37]' : 'text-[#6b645d]'}`} />
-                        {t.supabaseMode}
-                        </div>
-                        <p className="text-xs text-[#a19992] mt-2 leading-relaxed">{t.supabaseDesc}</p>
-                    </button>
+                {/* Mode Indicator */}
+                <div className="p-4 bg-emerald-950/20 border border-emerald-900/50 rounded-xl">
+                    <div className="flex items-center gap-2 font-semibold text-emerald-300 text-xs tracking-wider uppercase">
+                        <Database className="w-4 h-4 text-[#d4af37]" />
+                        {lang === 'ru' ? 'Режим работы: База данных Supabase' : 'Режим роботи: База даних Supabase'}
                     </div>
+                    <p className="text-xs text-[#a19992] mt-2 leading-relaxed">
+                        {lang === 'ru' 
+                          ? 'Магазин работает в полноценном режиме интеграции с реальной SQL базой данных. Все заказы поступают непосредственно в таблицу orders.' 
+                          : 'Магазин працює у повноцінному режимі інтеграції з реальною SQL базою даних. Усі замовлення надходять безпосередньо в таблицю orders.'}
+                    </p>
                 </div>
 
                 {/* Form Fields (Supabase settings) */}

@@ -194,26 +194,33 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
 
     const fetchOrders = async () => {
         setLoading(true);
-        const token = await getToken();
         const config = getStoredConfig();
-        const res = await fetch('/api/orders/list', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                adminPassword,
-                token,
-                supabaseConfig: {
-                    url: config.url,
-                    anonKey: config.anonKey || config.secretKey,
-                    tableName: config.tableName
-                }
-            })
-        });
-        const { data, error } = await res.json();
-        if (error) {
-            console.error('Error fetching orders:', error);
-        } else {
-            setOrders(data || []);
+
+        try {
+            const token = await getToken();
+            const res = await fetch('/api/orders/list', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    adminPassword,
+                    token,
+                    supabaseConfig: {
+                        url: config.url,
+                        anonKey: config.anonKey || config.secretKey,
+                        tableName: config.tableName
+                    }
+                })
+            });
+            const { data, error } = await res.json();
+            if (error) {
+                console.error('Error fetching orders from Supabase:', error);
+                setOrders([]);
+            } else {
+                setOrders(data || []);
+            }
+        } catch (e) {
+            console.error('Failed to fetch orders from api:', e);
+            setOrders([]);
         }
         setLoading(false);
     };
@@ -223,27 +230,31 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
     }, [adminPassword]);
 
     const executeUpdateStatus = async (orderId: string, finalStatus: string) => {
-        const token = await getToken();
         const config = getStoredConfig();
-        const res = await fetch('/api/orders/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                orderId,
-                status: finalStatus,
-                adminPassword,
-                token,
-                supabaseConfig: {
-                    url: config.url,
-                    anonKey: config.anonKey || config.secretKey,
-                    tableName: config.tableName
-                }
-            })
-        });
-        if (res.ok) {
-            setOrders(orders.map(o => o.id === orderId ? { ...o, status: finalStatus } : o));
-        } else {
-            console.error('Failed to update status');
+        const token = await getToken();
+        try {
+            const res = await fetch('/api/orders/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    orderId,
+                    status: finalStatus,
+                    adminPassword,
+                    token,
+                    supabaseConfig: {
+                        url: config.url,
+                        anonKey: config.anonKey || config.secretKey,
+                        tableName: config.tableName
+                    }
+                })
+            });
+            if (res.ok) {
+                setOrders(orders.map(o => o.id === orderId ? { ...o, status: finalStatus } : o));
+            } else {
+                console.error('Failed to update status on server');
+            }
+        } catch (e) {
+            console.error('Failed to update status on server:', e);
         }
     };
 

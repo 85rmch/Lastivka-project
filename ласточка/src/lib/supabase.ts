@@ -59,15 +59,12 @@ export function getDemoProducts(): Product[] {
 
 // Read config from localStorage if customized, otherwise use defaults
 export function getStoredConfig() {
-  const hasEnvSupabase = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
-  const defaultMode = hasEnvSupabase ? 'supabase' : 'demo';
-  const mode = (localStorage.getItem('supabase_mode') as 'demo' | 'supabase') || defaultMode;
   const url = localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL || '';
   const anonKey = localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
   const secretKey = localStorage.getItem('supabase_secret_key') || import.meta.env.VITE_SUPABASE_SECRET_KEY || '';
   const tableName = localStorage.getItem('supabase_table_name') || 'products';
 
-  return { mode, url, anonKey, secretKey, tableName };
+  return { mode: 'supabase' as 'demo' | 'supabase', url, anonKey, secretKey, tableName };
 }
 
 let authClientInstance: any = null;

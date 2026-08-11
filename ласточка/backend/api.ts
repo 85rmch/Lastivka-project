@@ -16,14 +16,14 @@ function getServerConfig() {
       const raw = fs.readFileSync(CONFIG_FILE_PATH, "utf8");
       const parsed = JSON.parse(raw);
       if (parsed && parsed.url) {
-        return parsed;
+        return { ...parsed, mode: "supabase" };
       }
     }
   } catch (e) {
     console.error("Failed to read server config:", e);
   }
   return {
-    mode: (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL) ? "supabase" : "demo",
+    mode: "supabase",
     url: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "",
     anonKey: process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || "",
     secretKey: process.env.VITE_SUPABASE_SECRET_KEY || process.env.SUPABASE_SECRET_KEY || "",

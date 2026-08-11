@@ -242,40 +242,9 @@ export async function fetchSupabaseProducts(): Promise<{
       return normalizedItem as Product;
     });
 
-    // Merge local edits, custom products, and filter deletions
-    let mergedProducts = normalized;
-    try {
-      const editedStored = localStorage.getItem('lastochka_edited_products');
-      if (editedStored) {
-        const edited: Product[] = JSON.parse(editedStored);
-        if (Array.isArray(edited)) {
-          mergedProducts = mergedProducts.map(p => {
-            const match = edited.find(e => (p.id && e.id === p.id) || (p.product_code && e.product_code === p.product_code));
-            return match ? { ...p, ...match } : p;
-          });
-        }
-      }
-
-      const customStored = localStorage.getItem('lastochka_custom_products');
-      if (customStored) {
-        const custom: Product[] = JSON.parse(customStored);
-        if (Array.isArray(custom)) {
-          const newCustom = custom.filter(c => !mergedProducts.some(p => (c.id && p.id === c.id) || (c.product_code && p.product_code === c.product_code)));
-          mergedProducts = [...newCustom, ...mergedProducts];
-        }
-      }
-
-      const deletedStored = localStorage.getItem('lastochka_deleted_products');
-      if (deletedStored) {
-        const deletedIds: (string | number)[] = JSON.parse(deletedStored);
-        if (Array.isArray(deletedIds)) {
-          mergedProducts = mergedProducts.filter(p => !deletedIds.includes(p.id) && !deletedIds.includes(p.product_code));
-        }
-      }
-    } catch (e) {
-      console.error('Error applying local edits to Supabase products:', e);
-    }
-
+    // In supabase mode, do NOT apply local storage overrides to prevent device desynchronization.
+    // The database is the single source of truth.
+    const mergedProducts = normalized;
     return { products: mergedProducts, source: 'supabase' };
   } catch (err: any) {
     console.error('Supabase fetch error:', err);
@@ -401,42 +370,44 @@ export async function seedSupabaseProducts(
 export async function updateProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   const config = getStoredConfig();
 
-  // 1. Always update local storage caches so edits work immediately everywhere
-  try {
-    const editedStored = localStorage.getItem('lastochka_edited_products');
-    let editedList: Product[] = editedStored ? JSON.parse(editedStored) : [];
-    const idx = editedList.findIndex(p => (product.id && p.id === product.id) || (product.product_code && p.product_code === product.product_code));
-    if (idx !== -1) {
-      editedList[idx] = product;
-    } else {
-      editedList.push(product);
-    }
-    localStorage.setItem('lastochka_edited_products', JSON.stringify(editedList));
-
-    const importedStored = localStorage.getItem('lastochka_imported_products');
-    if (importedStored) {
-      let imported: Product[] = JSON.parse(importedStored);
-      const impIdx = imported.findIndex(p => (product.id && p.id === product.id) || (product.product_code && p.product_code === product.product_code));
-      if (impIdx !== -1) {
-        imported[impIdx] = product;
-        localStorage.setItem('lastochka_imported_products', JSON.stringify(imported));
+  const updateLocalStorage = () => {
+    try {
+      const editedStored = localStorage.getItem('lastochka_edited_products');
+      let editedList: Product[] = editedStored ? JSON.parse(editedStored) : [];
+      const idx = editedList.findIndex(p => (product.id && p.id === product.id) || (product.product_code && p.product_code === product.product_code));
+      if (idx !== -1) {
+        editedList[idx] = product;
+      } else {
+        editedList.push(product);
       }
-    }
+      localStorage.setItem('lastochka_edited_products', JSON.stringify(editedList));
 
-    const customStored = localStorage.getItem('lastochka_custom_products');
-    if (customStored) {
-      let custom: Product[] = JSON.parse(customStored);
-      const custIdx = custom.findIndex(p => (product.id && p.id === product.id) || (product.product_code && p.product_code === product.product_code));
-      if (custIdx !== -1) {
-        custom[custIdx] = product;
-        localStorage.setItem('lastochka_custom_products', JSON.stringify(custom));
+      const importedStored = localStorage.getItem('lastochka_imported_products');
+      if (importedStored) {
+        let imported: Product[] = JSON.parse(importedStored);
+        const impIdx = imported.findIndex(p => (product.id && p.id === product.id) || (product.product_code && p.product_code === product.product_code));
+        if (impIdx !== -1) {
+          imported[impIdx] = product;
+          localStorage.setItem('lastochka_imported_products', JSON.stringify(imported));
+        }
       }
+
+      const customStored = localStorage.getItem('lastochka_custom_products');
+      if (customStored) {
+        let custom: Product[] = JSON.parse(customStored);
+        const custIdx = custom.findIndex(p => (product.id && p.id === product.id) || (product.product_code && p.product_code === product.product_code));
+        if (custIdx !== -1) {
+          custom[custIdx] = product;
+          localStorage.setItem('lastochka_custom_products', JSON.stringify(custom));
+        }
+      }
+    } catch (e) {
+      console.error('Failed to update local product storage:', e);
     }
-  } catch (e) {
-    console.error('Failed to update local product storage:', e);
-  }
+  };
 
   if (config.mode === 'demo') {
+    updateLocalStorage();
     return { success: true };
   }
 
@@ -464,13 +435,16 @@ export async function updateProduct(product: Product): Promise<{ success: boolea
     });
     const data = await res.json();
     if (!res.ok) {
-        console.warn('Backend update failed, using local edit cache:', data.error);
-        return { success: true };
+        console.error('Backend update failed:', data.error);
+        return { success: false, error: data.error };
     }
+    
+    // Update local caches only after successful database write
+    updateLocalStorage();
     return { success: true };
   } catch (err: any) {
-    console.error('Update product error, using local edit cache:', err);
-    return { success: true };
+    console.error('Update product error:', err);
+    return { success: false, error: err.message || err };
   }
 }
 
@@ -518,39 +492,41 @@ export async function testSupabaseConnection(url: string, key: string, tableName
 export async function deleteProduct(product: Product): Promise<{ success: boolean; error?: string }> {
   const config = getStoredConfig();
 
-  // 1. Record deletion in localStorage
-  try {
-    const deletedStored = localStorage.getItem('lastochka_deleted_products');
-    let deletedList: (string | number)[] = deletedStored ? JSON.parse(deletedStored) : [];
-    if (product.id && !deletedList.includes(product.id)) deletedList.push(product.id);
-    if (product.product_code && !deletedList.includes(product.product_code)) deletedList.push(product.product_code);
-    localStorage.setItem('lastochka_deleted_products', JSON.stringify(deletedList));
+  const updateLocalStorage = () => {
+    try {
+      const deletedStored = localStorage.getItem('lastochka_deleted_products');
+      let deletedList: (string | number)[] = deletedStored ? JSON.parse(deletedStored) : [];
+      if (product.id && !deletedList.includes(product.id)) deletedList.push(product.id);
+      if (product.product_code && !deletedList.includes(product.product_code)) deletedList.push(product.product_code);
+      localStorage.setItem('lastochka_deleted_products', JSON.stringify(deletedList));
 
-    const importedStored = localStorage.getItem('lastochka_imported_products');
-    if (importedStored) {
-      let parsed: Product[] = JSON.parse(importedStored);
-      parsed = parsed.filter(p => p.id !== product.id && p.product_code !== product.product_code);
-      localStorage.setItem('lastochka_imported_products', JSON.stringify(parsed));
-    }
+      const importedStored = localStorage.getItem('lastochka_imported_products');
+      if (importedStored) {
+        let parsed: Product[] = JSON.parse(importedStored);
+        parsed = parsed.filter(p => p.id !== product.id && p.product_code !== product.product_code);
+        localStorage.setItem('lastochka_imported_products', JSON.stringify(parsed));
+      }
 
-    const customStored = localStorage.getItem('lastochka_custom_products');
-    if (customStored) {
-      let custom: Product[] = JSON.parse(customStored);
-      custom = custom.filter(p => p.id !== product.id && p.product_code !== product.product_code);
-      localStorage.setItem('lastochka_custom_products', JSON.stringify(custom));
-    }
+      const customStored = localStorage.getItem('lastochka_custom_products');
+      if (customStored) {
+        let custom: Product[] = JSON.parse(customStored);
+        custom = custom.filter(p => p.id !== product.id && p.product_code !== product.product_code);
+        localStorage.setItem('lastochka_custom_products', JSON.stringify(custom));
+      }
 
-    const editedStored = localStorage.getItem('lastochka_edited_products');
-    if (editedStored) {
-      let edited: Product[] = JSON.parse(editedStored);
-      edited = edited.filter(p => p.id !== product.id && p.product_code !== product.product_code);
-      localStorage.setItem('lastochka_edited_products', JSON.stringify(edited));
+      const editedStored = localStorage.getItem('lastochka_edited_products');
+      if (editedStored) {
+        let edited: Product[] = JSON.parse(editedStored);
+        edited = edited.filter(p => p.id !== product.id && p.product_code !== product.product_code);
+        localStorage.setItem('lastochka_edited_products', JSON.stringify(edited));
+      }
+    } catch (e) {
+      console.error('Local deletion cache error:', e);
     }
-  } catch (e) {
-    console.error('Local deletion cache error:', e);
-  }
+  };
 
   if (config.mode === 'demo') {
+    updateLocalStorage();
     return { success: true };
   }
 
@@ -578,13 +554,16 @@ export async function deleteProduct(product: Product): Promise<{ success: boolea
     });
     const data = await res.json();
     if (!res.ok) {
-        console.warn('Backend delete failed, used local deletion cache:', data.error);
-        return { success: true };
+        console.error('Backend delete failed:', data.error);
+        return { success: false, error: data.error };
     }
+    
+    // Update local caches only after successful database write
+    updateLocalStorage();
     return { success: true };
   } catch (err: any) {
-    console.error('Delete product error, used local deletion cache:', err);
-    return { success: true };
+    console.error('Delete product error:', err);
+    return { success: false, error: err.message || err };
   }
 }
 

@@ -468,6 +468,8 @@ create table if not exists products (
 alter table products enable row level security;
 create policy "Allow public read access" on products for select using (true);
 create policy "Allow service uploads" on products for insert with check (true);
+create policy "Allow service updates" on products for update using (true);
+create policy "Allow service deletes" on products for delete using (true);
 
 -- 2. Структура SQL таблицы для блога
 create table if not exists blog_posts (

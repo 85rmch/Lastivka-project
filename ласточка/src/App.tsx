@@ -251,6 +251,7 @@ export default function App() {
   const [adminPasswordInput, setAdminPasswordInput] = useState<string>('');
   const [adminEmailInput, setAdminEmailInput] = useState<string>('');
   const [authMode, setAuthMode] = useState<'login' | 'reset'>('login');
+  const [authMethod, setAuthMethod] = useState<'password' | 'supabase_email'>('password');
   const [authLoading, setAuthLoading] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -1838,13 +1839,11 @@ export default function App() {
                 <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-3 pointer-events-none" />
               </div>
             </div>
+            
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-
-
-
         </div>
 
         {/* Right column representing actual product cards grids with counts */}
@@ -2106,6 +2105,7 @@ export default function App() {
 
         </div>
       </footer>
+
       {/* Admin Auth Modal */}
       <AnimatePresence>
         {isAdminAuthModalOpen && (
@@ -2118,16 +2118,37 @@ export default function App() {
             >
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 {dbStatus.mode === 'supabase'
-                  ? (authMode === 'login' ? (lang === 'ru' ? 'Вход в систему' : 'Вхід в систему') : 
-                     (lang === 'ru' ? 'Восстановление' : 'Відновлення'))
+                  ? (authMethod === 'supabase_email'
+                      ? (authMode === 'login' ? (lang === 'ru' ? 'Вход в систему' : 'Вхід в систему') : (lang === 'ru' ? 'Восстановление' : 'Відновлення'))
+                      : (lang === 'ru' ? 'Доступ администратора' : 'Доступ адміністратора'))
                   : (lang === 'ru' ? 'Доступ администратора' : 'Доступ адміністратора')}
               </h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-gray-500 mb-4">
                 {dbStatus.mode === 'supabase'
-                  ? (authMode === 'login' ? (lang === 'ru' ? 'Введите email и пароль.' : 'Введіть email та пароль.') :
-                     (lang === 'ru' ? 'Введите email для сброса пароля.' : 'Введіть email для скидання пароля.'))
+                  ? (authMethod === 'supabase_email'
+                      ? (authMode === 'login' ? (lang === 'ru' ? 'Введите email и пароль.' : 'Введіть email та пароль.') : (lang === 'ru' ? 'Введите email для сброса пароля.' : 'Введіть email для скидання пароля.'))
+                      : (lang === 'ru' ? 'Введите пароль администратора.' : 'Введіть пароль адміністратора.'))
                   : (lang === 'ru' ? 'Введите пароль для редактирования товаров.' : 'Введіть пароль для редагування.')}
               </p>
+              
+              {dbStatus.mode === 'supabase' && (
+                <div className="flex bg-gray-100 p-1 rounded-xl mb-4 text-xs font-semibold select-none">
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMethod('password'); setAuthError(''); }}
+                    className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer text-center ${authMethod === 'password' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+                  >
+                    {lang === 'ru' ? 'Пароль' : 'Пароль'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMethod('supabase_email'); setAuthError(''); }}
+                    className={`flex-1 py-1.5 rounded-lg transition-colors cursor-pointer text-center ${authMethod === 'supabase_email' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}
+                  >
+                    {lang === 'ru' ? 'Аккаунт Supabase' : 'Акаунт Supabase'}
+                  </button>
+                </div>
+              )}
               
               {authError && (
                 <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-lg border border-red-100">
@@ -2136,27 +2157,26 @@ export default function App() {
               )}
 
               <div className="space-y-4">
-                {dbStatus.mode === 'supabase' && (
+                {dbStatus.mode === 'supabase' && authMethod === 'supabase_email' && (
                   <input
                     type="email"
                     value={adminEmailInput}
                     onChange={e => setAdminEmailInput(e.target.value)}
                     placeholder={lang === 'ru' ? 'Email' : 'Email'}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:border-[#e02484] focus:ring-1 focus:ring-[#e02484] outline-none transition-all"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:border-[#e02484] focus:ring-1 focus:ring-[#e02484] outline-none transition-all text-gray-900 text-sm"
                   />
                 )}
                 
-                {(dbStatus.mode !== 'supabase' || authMode !== 'reset') && (
+                {(dbStatus.mode !== 'supabase' || authMethod === 'password' || authMode !== 'reset') && (
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={adminPasswordInput}
                       onChange={e => setAdminPasswordInput(e.target.value)}
                       placeholder={lang === 'ru' ? 'Пароль' : 'Пароль'}
-                      className="w-full pl-4 pr-11 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:border-[#e02484] focus:ring-1 focus:ring-[#e02484] outline-none transition-all"
+                      className="w-full pl-4 pr-11 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:border-[#e02484] focus:ring-1 focus:ring-[#e02484] outline-none transition-all text-gray-900 text-sm"
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
-                          // Only trigger if not loading
                           if (!authLoading) {
                             document.getElementById('admin-auth-submit')?.click();
                           }
@@ -2176,6 +2196,7 @@ export default function App() {
 
                 <div className="flex gap-3 pt-2">
                   <button
+                    type="button"
                     onClick={() => {
                       setIsAdminAuthModalOpen(false);
                       setAdminPasswordInput('');
@@ -2190,7 +2211,7 @@ export default function App() {
                     id="admin-auth-submit"
                     disabled={authLoading}
                     onClick={async () => {
-                      if (dbStatus.mode === 'supabase') {
+                      if (dbStatus.mode === 'supabase' && authMethod === 'supabase_email') {
                         const client = getAuthClient();
                         if (!client) {
                           setAuthError('Supabase is not configured properly.');
@@ -2223,24 +2244,43 @@ export default function App() {
                           setAuthLoading(false);
                         }
                       } else {
-                        // Demo mode
-                        localStorage.setItem('lastochka_admin_password', adminPasswordInput);
-                        setIsAdminAuthModalOpen(false);
-                        setManagerMode(true);
-                        setAdminPasswordInput('');
-                        triggerToast(lang === 'ru' ? 'Режим менеджера активен' : 'Режим менеджера активний', 'info');
+                        // Admin Password mode
+                        setAuthLoading(true);
+                        setAuthError('');
+                        try {
+                          const res = await fetch('/api/admin/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ adminPassword: adminPasswordInput })
+                          });
+                          const data = await res.json();
+                          if (!res.ok) {
+                            setAuthError(data.error || (lang === 'ru' ? 'Неверный пароль' : 'Невірний пароль'));
+                            setAuthLoading(false);
+                            return;
+                          }
+                          localStorage.setItem('lastochka_admin_password', adminPasswordInput);
+                          setIsAdminAuthModalOpen(false);
+                          setManagerMode(true);
+                          setAdminPasswordInput('');
+                          triggerToast(lang === 'ru' ? 'Режим менеджера активен' : 'Режим менеджера активний', 'info');
+                        } catch (err: any) {
+                          setAuthError(err.message || 'Login error');
+                        } finally {
+                          setAuthLoading(false);
+                        }
                       }
                     }}
                     className="flex-1 py-3 px-4 rounded-lg bg-[#e02484] hover:bg-[#c0146f] text-white font-semibold text-sm shadow-sm transition-colors disabled:opacity-50"
                   >
                     {authLoading ? '...' : 
-                     (dbStatus.mode === 'supabase' && authMode === 'reset') 
+                     (dbStatus.mode === 'supabase' && authMethod === 'supabase_email' && authMode === 'reset') 
                         ? (lang === 'ru' ? 'Отправить' : 'Відправити')
                         : (lang === 'ru' ? 'Войти' : 'Увійти')}
                   </button>
                 </div>
                 
-                {dbStatus.mode === 'supabase' && (
+                {dbStatus.mode === 'supabase' && authMethod === 'supabase_email' && (
                   <div className="flex flex-col gap-2 pt-4 text-center border-t border-gray-100 mt-4">
                     {authMode === 'login' ? (
                       <button onClick={() => setAuthMode('reset')} className="text-xs text-gray-500 hover:underline">

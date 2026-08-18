@@ -164,9 +164,9 @@ export default function ProductCard({
       </div>
 
       {/* Info Container */}
-      <div className="p-4 flex flex-col flex-1 bg-white">
+      <div className="p-2.5 sm:p-4 flex flex-col flex-1 bg-white">
         {/* Code & Availability bar */}
-        <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1 font-mono">
+        <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-gray-400 mb-1 font-mono">
           <span>{product.vendor_code && product.vendor_code !== '---' ? `${t.vendor}: ${product.vendor_code}` : ''}</span>
           <span className="flex items-center gap-1 font-semibold text-emerald-600">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -177,47 +177,47 @@ export default function ProductCard({
         {/* Name in Elegant Hot Pink color! */}
         <h3 
           onClick={() => onViewDetails(product)}
-          className="font-sans font-medium text-sm text-[#e02484] hover:text-[#c0146f] line-clamp-2 transition-colors cursor-pointer mb-2 min-h-[40px] leading-snug"
+          className="font-sans font-semibold text-xs sm:text-sm text-[#e02484] hover:text-[#c0146f] line-clamp-2 transition-colors cursor-pointer mb-1 sm:mb-2 min-h-[32px] sm:min-h-[40px] leading-snug"
         >
           {maybeTranslate(product.name, lang)}
         </h3>
 
         {/* Small parameter specifications text from product info */}
-        <p className="text-[11px] text-gray-500 line-clamp-2 mb-3 leading-relaxed">
+        <p className="text-[10px] sm:text-[11px] text-gray-500 line-clamp-2 mb-2 sm:mb-3 leading-tight sm:leading-relaxed">
           {product.color ? `${lang === 'ru' ? 'Цвет' : 'Колір'}: ${maybeTranslate(product.color, lang)}. ` : ''}
           {product.sizes ? `${lang === 'ru' ? 'Размеры' : 'Розміри'}: ${product.sizes}. ` : ''}
           {product.name.includes('Код') ? maybeTranslate(product.name.split('.').slice(1).join('.'), lang) : ''}
         </p>
 
         {/* Stars decoration precisely like screenshot: ☆ ☆ ☆ ☆ ☆ */}
-        <div className="flex gap-0.5 text-xs text-gray-300 mb-3 select-none">
+        <div className="flex gap-0.5 text-[10px] sm:text-xs text-gray-300 mb-2 sm:mb-3 select-none">
           <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
         </div>
 
         {/* Margin Profits / Manager mode info */}
         {showPriceMargin && (
-          <div className="p-2 mb-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-[11px] font-mono flex items-center justify-between">
+          <div className="p-2 mb-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-[10px] sm:text-[11px] font-mono flex items-center justify-between">
             <span>{t.profit}: <strong>{profit.toFixed(0)} ₴</strong></span>
-            <span className="bg-emerald-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold">
+            <span className="bg-emerald-600 text-white px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] font-bold">
               +{marginPercent}%
             </span>
           </div>
         )}
 
         {/* Price display in elegant black bold text */}
-        <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col gap-3">
-          <div className="text-base font-bold text-gray-900 font-sans">
+        <div className="mt-auto pt-2 sm:pt-3 border-t border-gray-100 flex flex-col gap-2 sm:gap-3">
+          <div className="text-sm sm:text-base font-extrabold text-gray-900 font-sans">
             {product.price.toLocaleString('uk-UA')} грн
           </div>
           
           {/* Action buttons divided precisely as in screenshot: [Купить (wide)] [Heart] [Details] in hot pink */}
-          <div className="grid grid-cols-4 gap-1">
+          <div className="grid grid-cols-4 gap-1 sm:gap-1.5">
             {/* Main Purchase Button */}
             <button
               onClick={handleQuickAdd}
-              className="col-span-2 py-2 bg-[#e02484] hover:bg-[#c0146f] text-white rounded font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer uppercase tracking-wider"
+              className="col-span-2 py-1.5 sm:py-2 bg-[#e02484] hover:bg-[#c0146f] text-white rounded font-bold text-[9px] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer uppercase tracking-wider"
             >
-              <ShoppingBag className="w-3.5 h-3.5" />
+              <ShoppingBag className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
               <span>{lang === 'ru' ? 'Купить' : 'Купити'}</span>
             </button>
 
@@ -227,23 +227,23 @@ export default function ProductCard({
                 e.stopPropagation();
                 onToggleFavorite(product.id);
               }}
-              className={`py-2 rounded flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer border ${
+              className={`py-1.5 sm:py-2 rounded flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer border ${
                 isFavorite 
                   ? 'bg-[#e02484] border-[#e02484] text-white' 
                   : 'bg-[#fdf2f8] border-pink-100 text-[#e02484] hover:bg-[#e02484] hover:text-white'
               }`}
               title={lang === 'ru' ? 'В избранное' : 'До обраного'}
             >
-              <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-white' : ''}`} />
+              <Heart className={`w-3 sm:w-3.5 h-3 sm:h-3.5 ${isFavorite ? 'fill-white' : ''}`} />
             </button>
 
             {/* View Details Button */}
             <button
               onClick={() => onViewDetails(product)}
-              className="py-2 bg-[#fdf2f8] border border-pink-100 text-[#e02484] hover:bg-[#e02484] hover:text-white rounded flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
+              className="py-1.5 sm:py-2 bg-[#fdf2f8] border border-pink-100 text-[#e02484] hover:bg-[#e02484] hover:text-white rounded flex items-center justify-center transition-all shadow-sm active:scale-95 cursor-pointer"
               title={lang === 'ru' ? 'Подробнее' : 'Детальніше'}
             >
-              <Eye className="w-3.5 h-3.5" />
+              <Eye className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
             </button>
           </div>
         </div>

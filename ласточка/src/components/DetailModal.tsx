@@ -62,8 +62,7 @@ export default function DetailModal({
       added: 'Добавлено!',
       features: {
         delivery: 'Быстрая доставка по всей Украине (Новая Почта / Укрпочта)',
-        secure: '100% безопасная оплата или наложенный платеж',
-        exchange: 'Обмен и возврат в течение 14 дней'
+        secure: '100% безопасная оплата или наложенный платеж'
       },
       specs: 'Характеристики',
       costPrice: 'Себестоимость',
@@ -82,8 +81,7 @@ export default function DetailModal({
       added: 'Додано!',
       features: {
         delivery: 'Швидка доставка по всій Україні (Нова Пошта / Укрпошта)',
-        secure: '100% безпечна оплата або післяплата',
-        exchange: 'Обмін та повернення протягом 14 днів'
+        secure: '100% безпечна оплата або післяплата'
       },
       specs: 'Характеристики',
       costPrice: 'Собівартість',
@@ -385,10 +383,6 @@ export default function DetailModal({
             <div className="flex items-start gap-2.5">
               <ShieldCheck className="w-4 h-4 text-[#e02484] shrink-0 mt-0.5" />
               <span>{t.features.secure}</span>
-            </div>
-            <div className="flex items-start gap-2.5">
-              <RefreshCcw className="w-4 h-4 text-[#e02484] shrink-0 mt-0.5" />
-              <span>{t.features.exchange}</span>
             </div>
           </div>
 

@@ -821,10 +821,41 @@ export default function App() {
   const renderCategoryIcon = (key: CategoryKey, className = "w-4 h-4") => {
     switch (key) {
       case 'new': return <Star className={className} />;
-      case 'pajamas': return <Shirt className={className} />;
-      case 'underwear': return <Heart className={className} />;
+      case 'pajamas':
+        return (
+          <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="46" fill="currentColor" />
+            <path d="M 37 18 Q 38 24.5 39.5 31 L 41 31 Q 39.5 24.5 38.5 18 Z" fill="white" />
+            <path d="M 63 18 Q 62 24.5 60.5 31 L 59 31 Q 60.5 24.5 61.5 18 Z" fill="white" />
+            <path d="M 31 37.5 Q 35 34 40 31 Q 45 37 50 41 Q 55 37 60 31 Q 65 34 69 37.5 C 67 50, 67 65, 69 78 L 31 78 C 33 65, 33 50, 31 37.5 Z" fill="white" />
+          </svg>
+        );
+      case 'underwear':
+        return (
+          <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="46" fill="currentColor" />
+            <path d="M43.5 76.5 C43 71 40 68 34 66 C28.5 64 26.5 59 26.5 55.5 C26.5 51.5 30.5 47.5 35.5 47.5 C39.5 47.5 42 50 43.5 51.5 C42.5 46.5 39 34 18.5 14 C23 26.5 33 41 41.5 45 C41.5 41 45 31 73.5 16.5 C68.5 27 59.5 38 54.5 46.5 C52.5 50 52.5 54.5 54.5 58 C56.5 61.5 61 65 62.5 70.5 C63.5 74.5 62.5 76 60.5 76.5 C56.5 77.5 50 78.5 43.5 76.5 Z" fill="white" />
+            <circle cx="37" cy="57" r="3.5" fill="currentColor" />
+            <path d="M41.5 79.5 L32 76.5 L32 84 L41.5 81.5 L51 84 L51 76.5 Z" fill="white" />
+            <path d="M43 75.5 L60.5 75.5 L59.5 78 L42.5 78 Z" fill="white" />
+          </svg>
+        );
+      case 'panties':
+        return (
+          <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="46" fill="currentColor" />
+            <path d="M 22 36 C 32 41.5, 68 41.5, 78 36 C 80.5 40, 73.5 49, 56 72 L 44 72 C 26.5 49, 19.5 40, 22 36 Z" fill="white" />
+          </svg>
+        );
       case 'thermals': return <Flame className={className} />;
-      case 'socks': return <Footprints className={className} />;
+      case 'socks':
+        return (
+          <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="46" fill="currentColor" />
+            <path d="M 76 17 C 78 20, 79 26, 78 30 C 72 35, 60 34, 52 30 C 49 28, 48 29, 48 31 C 48 36, 52 47, 49 59 C 46 68, 39 74, 29 79 C 26 80.5, 26 83, 31 83 C 41 83, 47 80, 48 76 C 50 70, 54 59, 58 50 C 62 41, 70 33, 76 29 C 78 26, 78 20, 76 17 Z" fill="white" />
+            <path d="M 32 38 L 41 38 L 40 50 C 40 54, 38 56, 31 57 L 22 57 C 19 57, 19 53, 23 50 L 32 48 Z" fill="white" />
+          </svg>
+        );
       case 'jeggings': return <Layers className={className} />;
       case 'games': return <Gamepad2 className={className} />;
       default: return <Sparkles className={className} />;

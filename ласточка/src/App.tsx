@@ -30,7 +30,7 @@ import {
   Sun,
   Moon,
   Globe,
-  Mail, Home, Clock, CornerUpRight, Share, Eye, EyeOff} from 'lucide-react';
+  Mail, Home, Clock, CornerUpRight, Share, Eye, EyeOff, Instagram} from 'lucide-react';
 import { Product, CategoryKey, CartItem, Order, BlogPost } from './types';
 import { CATEGORIES, PRODUCTS, getCleanImage, cleanImageUrl } from './data';
 import { fetchSupabaseProducts, getStoredConfig, getDemoProducts, getAuthClient, fetchSupabaseBlogPosts, saveSupabaseBlogPost, deleteSupabaseBlogPost } from './lib/supabase';
@@ -241,6 +241,12 @@ export default function App() {
   const [sortBy, setSortBy] = useState<string>('default'); // 'default', 'priceAsc', 'priceDesc', 'stock'
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  // Reset page when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedMenu, maxPrice, selectedSizes, selectedColor, sortBy]);
 
   // Modals & Panels toggles
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -796,6 +802,72 @@ export default function App() {
     if (sortBy === 'stock') return b.stock - a.stock;
     return 0; // Default / Unsorted
   });
+
+  // Pagination calculations
+  const PRODUCTS_PER_PAGE = 50;
+  const totalPages = Math.ceil(sortedProducts.length / PRODUCTS_PER_PAGE);
+  const activePage = Math.min(currentPage, Math.max(1, totalPages));
+  const startIndex = (activePage - 1) * PRODUCTS_PER_PAGE;
+  const paginatedProducts = sortedProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    const catalogElement = document.getElementById('catalog-section');
+    if (catalogElement) {
+      catalogElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 350, behavior: 'smooth' });
+    }
+  };
+
+  // Helper to generate page item list (e.g. [1, "dots", 4, 5, 6, "dots", 10])
+  const getPaginationRange = () => {
+    const range: (number | string)[] = [];
+    const siblingCount = 1; // Number of pages on each side of the active page
+    
+    // Always show first and last page
+    const firstPage = 1;
+    const lastPage = totalPages;
+    
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) {
+        range.push(i);
+      }
+      return range;
+    }
+    
+    const leftSiblingIndex = Math.max(activePage - siblingCount, 1);
+    const rightSiblingIndex = Math.min(activePage + siblingCount, totalPages);
+    
+    const shouldShowLeftDots = leftSiblingIndex > 2;
+    const shouldShowRightDots = rightSiblingIndex < totalPages - 1;
+    
+    if (!shouldShowLeftDots && shouldShowRightDots) {
+      const itemCount = 3 + 2 * siblingCount;
+      for (let i = 1; i <= itemCount; i++) {
+        range.push(i);
+      }
+      range.push('dots');
+      range.push(lastPage);
+    } else if (shouldShowLeftDots && !shouldShowRightDots) {
+      const itemCount = 3 + 2 * siblingCount;
+      range.push(firstPage);
+      range.push('dots');
+      for (let i = totalPages - itemCount + 1; i <= totalPages; i++) {
+        range.push(i);
+      }
+    } else if (shouldShowLeftDots && shouldShowRightDots) {
+      range.push(firstPage);
+      range.push('dots');
+      for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) {
+        range.push(i);
+      }
+      range.push('dots');
+      range.push(lastPage);
+    }
+    
+    return range;
+  };
 
   // Toggle size filter
   const handleToggleSize = (size: string) => {
@@ -1879,7 +1951,7 @@ export default function App() {
         </div>
 
         {/* Right column representing actual product cards grids with counts */}
-        <div className="lg:col-span-3 space-y-6">
+        <div id="catalog-section" className="lg:col-span-3 space-y-6">
           
           {/* Active stats, filters or source details */}
           <div className="flex items-center justify-between">
@@ -1934,37 +2006,108 @@ export default function App() {
               </button>
             </div>
           ) : (
-            /* Beautiful Product Grid */
-            <motion.div 
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
-            >
-              <AnimatePresence mode="popLayout">
-                {sortedProducts.map(product => {
-                  const isFav = favorites.includes(product.id);
-                  return (
-                    <motion.div
-                      key={product.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.92 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.92 }}
-                      transition={{ duration: 0.25 }}
+            <>
+              {/* Beautiful Product Grid */}
+              <motion.div 
+                layout
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"
+              >
+                <AnimatePresence mode="popLayout">
+                  {paginatedProducts.map(product => {
+                    const isFav = favorites.includes(product.id);
+                    return (
+                      <motion.div
+                        key={product.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.92 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.92 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <ProductCard
+                          product={product}
+                          onViewDetails={setSelectedProduct}
+                          onAddToCart={(p, sz, col) => handleAddToCart(p, sz, col, 1)}
+                          isFavorite={isFav}
+                          onToggleFavorite={handleToggleFavorite}
+                          lang={lang}
+                          showPriceMargin={managerMode}
+                        />
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </motion.div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 pb-2 border-t border-gray-150 text-sans">
+                  <span className="text-xs font-semibold text-gray-400">
+                    {lang === 'ru' 
+                      ? `Показано ${startIndex + 1}–${Math.min(startIndex + PRODUCTS_PER_PAGE, sortedProducts.length)} из ${sortedProducts.length} товаров`
+                      : `Показано ${startIndex + 1}–${Math.min(startIndex + PRODUCTS_PER_PAGE, sortedProducts.length)} із ${sortedProducts.length} товарів`}
+                  </span>
+                  
+                  <div className="flex items-center gap-1.5">
+                    {/* Prev Button */}
+                    <button
+                      onClick={() => handlePageChange(activePage - 1)}
+                      disabled={activePage === 1}
+                      className={`flex items-center justify-center p-2 rounded-lg border text-xs font-bold transition-all select-none cursor-pointer ${
+                        activePage === 1
+                          ? "border-gray-100 bg-gray-50/50 text-gray-300 cursor-not-allowed"
+                          : "border-gray-200 text-gray-750 bg-white hover:bg-pink-50/50 hover:text-[#e02484] hover:border-pink-100"
+                      }`}
+                      title={lang === 'ru' ? 'Предыдущая страница' : 'Попередня сторінка'}
                     >
-                      <ProductCard
-                        product={product}
-                        onViewDetails={setSelectedProduct}
-                        onAddToCart={(p, sz, col) => handleAddToCart(p, sz, col, 1)}
-                        isFavorite={isFav}
-                        onToggleFavorite={handleToggleFavorite}
-                        lang={lang}
-                        showPriceMargin={managerMode}
-                      />
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </motion.div>
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+
+                    {/* Page Numbers */}
+                    {getPaginationRange().map((p, idx) => {
+                      if (p === 'dots') {
+                        return (
+                          <span key={`dots-${idx}`} className="text-gray-400 px-1 font-bold text-xs select-none">
+                            •••
+                          </span>
+                        );
+                      }
+
+                      const pageNum = p as number;
+                      const isSelected = pageNum === activePage;
+
+                      return (
+                        <button
+                          key={`page-${pageNum}`}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`min-w-[32px] h-8 rounded-lg text-xs font-bold transition-all select-none cursor-pointer ${
+                            isSelected
+                              ? "bg-[#e02484] text-white shadow-sm border border-transparent"
+                              : "bg-white border border-gray-200 text-gray-700 hover:bg-pink-50/50 hover:text-[#e02484] hover:border-pink-100"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handlePageChange(activePage + 1)}
+                      disabled={activePage === totalPages}
+                      className={`flex items-center justify-center p-2 rounded-lg border text-xs font-bold transition-all select-none cursor-pointer ${
+                        activePage === totalPages
+                          ? "border-gray-100 bg-gray-50/50 text-gray-300 cursor-not-allowed"
+                          : "border-gray-200 text-gray-750 bg-white hover:bg-pink-50/50 hover:text-[#e02484] hover:border-pink-100"
+                      }`}
+                      title={lang === 'ru' ? 'Следующая страница' : 'Наступна сторінка'}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {/* Orders History List section - Displayed if orders have been placed inside this local simulation */}
@@ -2088,7 +2231,32 @@ export default function App() {
                 НИЖНЯ БІЛИЗНА КРИВИЙ РІГ
               </p>
             </div>
-            <p className="text-[10px] text-gray-500 font-sans mt-2.5 font-normal">
+
+            {/* Social Icons */}
+            <div className="flex items-center gap-3 mt-3">
+              <a 
+                href="https://www.instagram.com/lastochka.dp.ua?utm_source=qr&igsh=eGM2b2RqZjNhMzB5" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#e02484] hover:bg-[#e02484] hover:text-white transition-all shadow-sm border border-pink-100 hover:scale-110 cursor-pointer"
+                title="Instagram"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://tiktok.com/@lastochka.dp.ua" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#e02484] hover:bg-[#e02484] hover:text-white transition-all shadow-sm border border-pink-100 hover:scale-110 cursor-pointer"
+                title="TikTok"
+              >
+                <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/>
+                </svg>
+              </a>
+            </div>
+
+            <p className="text-[10px] text-gray-500 font-sans mt-3.5 font-normal">
               "ЛАСТІВКА" | модна нижня білизна © 2026
             </p>
           </div>

@@ -37,6 +37,26 @@ export default function BlogView({ lang, managerMode, posts, onAddPost, onDelete
   const [composeTab, setComposeTab] = useState<'edit' | 'preview'>('edit');
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   
+  // Preview Expansion States
+  const [expandedPosts, setExpandedPosts] = useState<Record<string, boolean>>({});
+
+  const togglePostExpanded = (id: string) => {
+    setExpandedPosts(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const isPostLarge = (post: BlogPost) => {
+    if (post.blocks && post.blocks.length > 0) {
+      if (post.blocks.length > 1) return true;
+      const firstBlock = post.blocks[0];
+      if (firstBlock.type === 'text' && firstBlock.value.replace(/<[^>]*>/g, '').length > 300) return true;
+      return false;
+    }
+    return post.content ? post.content.length > 300 : false;
+  };
+  
   // Compose States
   const [newTitle, setNewTitle] = useState('');
   const [blocks, setBlocks] = useState<BlogBlock[]>([
@@ -839,52 +859,90 @@ export default function BlogView({ lang, managerMode, posts, onAddPost, onDelete
                   </div>
                   
                   {/* Article content render */}
-                  {post.blocks && post.blocks.length > 0 ? (
-                    // Rendering of Block-Based Article
-                    <div className="prose max-w-none text-gray-700 font-sans space-y-6">
-                      {post.blocks.map((block) => {
-                        if (block.type === 'text') {
-                          return renderStyledTextBlock(block);
-                        } else {
-                          return (
-                            <div key={block.id} className="my-8 max-w-2xl mx-auto rounded-2xl overflow-hidden border border-gray-150 shadow-md bg-gray-50/50 group/img">
-                              <img 
-                                src={block.value} 
-                                alt={post.title} 
-                                className="w-full h-auto object-cover max-h-[500px] hover:scale-[1.01] transition-transform duration-300"
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                                referrerPolicy="no-referrer"
-                              />
+                  {(() => {
+                    const large = isPostLarge(post);
+                    const expanded = expandedPosts[post.id];
+                    
+                    return (
+                      <div className="space-y-4">
+                        <div className={large && !expanded ? "relative max-h-[220px] overflow-hidden" : ""}>
+                          {post.blocks && post.blocks.length > 0 ? (
+                            // Rendering of Block-Based Article
+                            <div className="prose max-w-none text-gray-700 font-sans space-y-6">
+                              {post.blocks.map((block) => {
+                                if (block.type === 'text') {
+                                  return renderStyledTextBlock(block);
+                                } else {
+                                  return (
+                                    <div key={block.id} className="my-8 max-w-2xl mx-auto rounded-2xl overflow-hidden border border-gray-150 shadow-md bg-gray-50/50 group/img">
+                                      <img 
+                                        src={block.value} 
+                                        alt={post.title} 
+                                        className="w-full h-auto object-cover max-h-[500px] hover:scale-[1.01] transition-transform duration-300"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                        referrerPolicy="no-referrer"
+                                      />
+                                    </div>
+                                  );
+                                }
+                              })}
                             </div>
-                          );
-                        }
-                      })}
-                    </div>
-                  ) : (
-                    // Legacy Support Rendering (Standard Paragraphs & bottom Image Grid)
-                    <div className="space-y-6">
-                      <div className="prose max-w-none text-gray-700 font-sans whitespace-pre-wrap leading-relaxed text-sm md:text-base">
-                        {post.content}
-                      </div>
+                          ) : (
+                            // Legacy Support Rendering (Standard Paragraphs & bottom Image Grid)
+                            <div className="space-y-6">
+                              <div className="prose max-w-none text-gray-700 font-sans whitespace-pre-wrap leading-relaxed text-sm md:text-base">
+                                {post.content}
+                              </div>
 
-                      {post.images && post.images.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-50">
-                          {post.images.map((img, idx) => (
-                            <div key={idx} className="aspect-[4/3] rounded-xl overflow-hidden border border-gray-100 bg-gray-50 shadow-sm relative group">
-                              <img 
-                                src={img} 
-                                alt="" 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                                referrerPolicy="no-referrer"
-                              />
+                              {post.images && post.images.length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-50">
+                                  {post.images.map((img, idx) => (
+                                    <div key={idx} className="aspect-[4/3] rounded-xl overflow-hidden border border-gray-100 bg-gray-50 shadow-sm relative group">
+                                      <img 
+                                        src={img} 
+                                        alt="" 
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                        referrerPolicy="no-referrer"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                          ))}
+                          )}
+                          
+                          {/* Beautiful gradient fade-out for preview */}
+                          {large && !expanded && (
+                            <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none" />
+                          )}
                         </div>
-                      )}
-                    </div>
-                  )}
+
+                        {/* Read more toggle button */}
+                        {large && (
+                          <div className="flex justify-center pt-2">
+                            <button
+                              onClick={() => togglePostExpanded(post.id)}
+                              className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-pink-100 bg-pink-50/30 hover:bg-pink-50 text-[#e02484] font-bold text-xs transition-all shadow-sm hover:shadow cursor-pointer select-none"
+                            >
+                              {expanded ? (
+                                <>
+                                  <span>{lang === 'ru' ? 'Свернуть' : 'Згорнути'}</span>
+                                  <ChevronUp className="w-3.5 h-3.5" />
+                                </>
+                              ) : (
+                                <>
+                                  <span>{lang === 'ru' ? 'Подробнее' : 'Детальніше'}</span>
+                                  <ChevronDown className="w-3.5 h-3.5 animate-bounce" />
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                 </div>
               </article>

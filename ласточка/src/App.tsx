@@ -30,7 +30,7 @@ import {
   Sun,
   Moon,
   Globe,
-  Mail, Home, Clock, CornerUpRight, Share, Eye, EyeOff, Instagram} from 'lucide-react';
+  Mail, Home, Clock, CornerUpRight, Share, Eye, EyeOff, Instagram, ArrowRight} from 'lucide-react';
 import { Product, CategoryKey, CartItem, Order, BlogPost } from './types';
 import { CATEGORIES, PRODUCTS, getCleanImage, cleanImageUrl } from './data';
 import { fetchSupabaseProducts, getStoredConfig, getDemoProducts, getAuthClient, fetchSupabaseBlogPosts, saveSupabaseBlogPost, deleteSupabaseBlogPost } from './lib/supabase';
@@ -242,6 +242,14 @@ export default function App() {
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [showWelcome, setShowWelcome] = useState<boolean>(() => {
+    try {
+      const dismissed = sessionStorage.getItem('lastochka_welcome_dismissed');
+      return dismissed !== 'true';
+    } catch {
+      return true;
+    }
+  });
 
   // Reset page when search or filters change
   useEffect(() => {
@@ -1066,6 +1074,91 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#faf9f8] text-gray-800 flex flex-col font-sans selection:bg-pink-100 selection:text-[#e02484]">
+      
+      {/* Telegram / Client Welcome Overlay */}
+      <AnimatePresence>
+        {showWelcome && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#faf9f8] flex flex-col items-center justify-center p-6 text-center select-none overflow-y-auto"
+          >
+            {/* Elegant warm gradient circular glow behind the content */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-pink-100/40 blur-[80px] pointer-events-none" />
+            
+            <div className="relative max-w-sm w-full space-y-8 flex flex-col items-center bg-white p-8 rounded-2xl border border-gray-100 shadow-xl">
+              {/* Elegant Swallow / Bird Icon or Delicate Logo container */}
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.15, type: 'spring' }}
+                className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-lg border border-pink-100 relative overflow-hidden"
+              >
+                <div className="absolute inset-1 rounded-full border border-dashed border-[#e02484]/20" />
+                
+                {/* Custom swallow SVG representation */}
+                <svg className="w-9 h-9 text-[#e02484]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.36 15.5c-.32.03-.6-.18-.63-.5-.03-.32.18-.6.5-.63.83-.08 1.48-.75 1.51-1.59.03-.89-.7-1.65-1.59-1.62-.35.01-.65-.25-.66-.6-.01-.35.25-.65.6-.66 1.54-.05 2.82 1.15 2.85 2.69.03 1.51-1.12 2.78-2.58 2.91zm.77-5.59c-.3.17-.68.07-.85-.23l-.15-.26c-.46-.8-1.33-1.3-2.25-1.3-.92 0-1.79.5-2.25 1.3l-.15.26c-.17.3-.55.4-.85.23-.3-.17-.4-.55-.23-.85l.15-.26C10.23 9.41 11.51 8.5 12 8.5c.49 0 1.77.91 2.44 2.06l.15.26c.17.3.07.68-.23.85zm-4.77 4.96c-.03.32-.31.53-.63.5-1.46-.13-2.61-1.4-2.58-2.91.03-1.54 1.31-2.74 2.85-2.69.35.01.61.31.6.66-.01.35-.31.61-.66.6-.89-.03-1.62.73-1.59 1.62.03.84.68 1.51 1.51 1.59.32.03.53.31.5.63z" />
+                </svg>
+              </motion.div>
+
+              <div className="space-y-4">
+                {/* Hot pink tracked "Welcome" eyebrow */}
+                <motion.span
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.25 }}
+                  className="block text-[10px] font-extrabold uppercase tracking-[0.25em] text-[#e02484]"
+                >
+                  Ласкаво просимо
+                </motion.span>
+                
+                {/* Beautiful greeting title */}
+                <motion.h2
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.35 }}
+                  className="font-sans font-extrabold text-xl text-gray-900 tracking-tight leading-snug"
+                >
+                  Вітаємо в інтернет-магазині «Ластівка»! 🌸
+                </motion.h2>
+
+                {/* Welcoming descriptive body text */}
+                <motion.p
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.45 }}
+                  className="text-xs text-gray-500 leading-relaxed font-sans px-2"
+                >
+                  Відкрийте для себе світ вишуканої та стильної жіночої білизни, створеної для вашої краси, впевненості та комфорту. Ми підготували для вас найкращі моделі та чудовий сервіс! ✨
+                </motion.p>
+              </div>
+
+              {/* Enter button: "Магазин Ластівка" */}
+              <motion.div
+                initial={{ y: 15, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.55 }}
+                className="w-full pt-2"
+              >
+                <button
+                  onClick={() => {
+                    try {
+                      sessionStorage.setItem('lastochka_welcome_dismissed', 'true');
+                    } catch (e) {}
+                    setShowWelcome(false);
+                  }}
+                  className="w-full py-3.5 px-6 bg-[#e02484] hover:bg-[#c0146f] text-white rounded-xl font-bold text-xs tracking-wide transition-all shadow-md active:scale-[0.97] cursor-pointer flex items-center justify-center gap-2 group border border-transparent uppercase"
+                >
+                  <span>Магазин Ластівка</span>
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </button>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Toast Notification popup banner */}
       <AnimatePresence>

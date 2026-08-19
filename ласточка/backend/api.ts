@@ -76,23 +76,11 @@ async function initTelegramBot() {
         const chatId = ctx.chat?.id;
 
         if (!payload) {
-          const appUrl = process.env.APP_URL || "https://lastivka-wine.vercel.app/";
           await ctx.reply(
             "🌸 *Ласкаво просимо до магазину Ластівка!*\n\n" +
-            "Раді вітати вас! Тут ви можете ознайомитися з нашим вишуканим асортиментом жіночої білизни та одягу, оформити замовлення та стежити за його статусом.\n\n" +
-            "Натисніть на кнопку нижче, щоб відкрити наш магазин:",
+            "Раді вітати вас! Тут ви можете ознайомитися з нашим вишуканим асортиментом жіночої білизни та одягу, оформити замовлення та стежити за його статусом.",
             {
-              parse_mode: "Markdown",
-              reply_markup: {
-                inline_keyboard: [
-                  [
-                    {
-                      text: "Магазин Ластівка 🛍",
-                      url: appUrl
-                    }
-                  ]
-                ]
-              }
+              parse_mode: "Markdown"
             }
           );
           return;

@@ -76,7 +76,7 @@ async function initTelegramBot() {
         const chatId = ctx.chat?.id;
 
         if (!payload) {
-          const appUrl = process.env.APP_URL || "https://ais-dev-n4axb7vxit43fbl57u2xmt-269880335696.europe-west2.run.app";
+          const appUrl = process.env.APP_URL || "https://ais-pre-li76ithbk3jvfs5x4lfyvy-59755097240.europe-west2.run.app";
           await ctx.reply(
             "🌸 *Ласкаво просимо до магазину Ластівка!*\n\n" +
             "Раді вітати вас! Тут ви можете ознайомитися з нашим вишуканим асортиментом жіночої білизни та одягу, оформити замовлення та стежити за його статусом.\n\n" +

@@ -88,7 +88,7 @@ async function initTelegramBot() {
                   [
                     {
                       text: "Магазин Ластівка 🛍",
-                      web_app: { url: appUrl }
+                      url: appUrl
                     }
                   ]
                 ]

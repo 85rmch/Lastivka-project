@@ -34,6 +34,7 @@ export default function CartDrawer({
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [isTgDetected, setIsTgDetected] = useState(false);
   const [botUsername, setBotUsername] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -107,6 +108,10 @@ export default function CartDrawer({
       shippingFreeCondition: 'При заказе от 1 500 ₴ доставка бесплатна!',
       total: 'Итого к оплате',
       orderBtn: 'Подтвердить заказ',
+      confirmTitle: 'Подтверждение заказа',
+      confirmDesc: 'Пожалуйста, проверьте правильность введенных данных перед оформлением заказа:',
+      confirmYes: 'Да, подтверждаю',
+      confirmNo: 'Проверить данные',
       successTitle: 'Заказ успешно оформлен!',
       successDesc: 'Спасибо за заказ! Наш менеджер свяжется с вами в ближайшее время по указанному телефону для подтверждения деталей.',
       orderNum: 'Номер вашего заказа',
@@ -145,6 +150,10 @@ export default function CartDrawer({
       shippingFreeCondition: 'При замовленні від 1 500 ₴ доставка безкоштовна!',
       total: 'Всього до сплати',
       orderBtn: 'Підтвердити замовлення',
+      confirmTitle: 'Підтвердження замовлення',
+      confirmDesc: 'Будь ласка, перевірте правильність введених даних перед оформленням замовлення:',
+      confirmYes: 'Так, підтверджую',
+      confirmNo: 'Перевірити дані',
       successTitle: 'Замовлення успішно оформлено!',
       successDesc: 'Дякуємо за замовлення! Наш менеджер зв\'яжеться з вами найближчим часом за вказаним телефоном для підтвердження деталей.',
       orderNum: 'Номер вашого замовлення',
@@ -162,7 +171,10 @@ export default function CartDrawer({
   const handleSubmitOrder = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !phone || (deliveryMethod !== 'pickup' && !deliveryAddress)) return;
+    setShowConfirmModal(true);
+  };
 
+  const handleFinalizeOrder = () => {
     const orderId = 'LST-' + Math.floor(100000 + Math.random() * 900000);
     
     const deliveryStr = deliveryMethod === 'pickup'
@@ -178,6 +190,7 @@ export default function CartDrawer({
 
     setPlacedOrderId(orderId);
     setOrderCompleted(true);
+    setShowConfirmModal(false);
     setName('');
     setPhone('');
     setTelegram('');
@@ -500,6 +513,68 @@ export default function CartDrawer({
             referrerPolicy="no-referrer"
             onClick={(e) => e.stopPropagation()}
           />
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl p-5 md:p-6 max-w-sm w-full shadow-2xl border border-gray-100 space-y-4 text-center text-gray-800">
+            <div className="w-12 h-12 bg-pink-50 text-[#e02484] border border-pink-100 rounded-full flex items-center justify-center mx-auto animate-bounce-subtle">
+              <ShoppingBag className="w-6 h-6" />
+            </div>
+            
+            <div className="space-y-1">
+              <h4 className="text-base font-bold text-gray-900">{t.confirmTitle}</h4>
+              <p className="text-[11px] text-gray-400 leading-normal font-sans">{t.confirmDesc}</p>
+            </div>
+
+            <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 text-left text-xs space-y-2 font-sans leading-relaxed">
+              <p className="text-gray-600">
+                <span className="font-semibold text-gray-400 mr-1.5">{t.nameLabel.replace(' *', '')}:</span> 
+                <strong className="text-gray-800 font-bold">{name}</strong>
+              </p>
+              <p className="text-gray-600">
+                <span className="font-semibold text-gray-400 mr-1.5">{t.phoneLabel.replace(' *', '')}:</span> 
+                <strong className="text-gray-800 font-bold font-mono">{phone}</strong>
+              </p>
+              <p className="text-gray-600 leading-snug">
+                <span className="font-semibold text-gray-400 mr-1.5">{t.deliveryLabel.replace(' *', '')}:</span> 
+                <strong className="text-gray-800 font-bold">
+                  {deliveryMethod === 'pickup' 
+                    ? (lang === 'ru' ? 'Самовывоз (Кривой Рог)' : 'Самовивіз (Кривий Ріг)')
+                    : `${deliveryMethod === 'np' ? 'Нова Почта' : 'Укрпочта'} - ${deliveryAddress}`}
+                </strong>
+              </p>
+              {telegram && (
+                <p className="text-gray-600">
+                  <span className="font-semibold text-gray-400 mr-1.5">Telegram:</span> 
+                  <strong className="text-gray-800 font-bold font-mono">{telegram}</strong>
+                </p>
+              )}
+              <div className="pt-2 border-t border-gray-200 flex justify-between font-bold text-gray-900">
+                <span>{t.total}:</span>
+                <span>{total.toLocaleString('uk-UA')} грн</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-2.5 font-bold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs transition-colors cursor-pointer"
+              >
+                {t.confirmNo}
+              </button>
+              <button
+                type="button"
+                onClick={handleFinalizeOrder}
+                className="flex-1 py-2.5 font-bold text-white bg-[#e02484] hover:bg-[#c0146f] rounded-xl text-xs transition-colors cursor-pointer shadow-sm active:scale-95"
+              >
+                {t.confirmYes}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1281,7 +1281,6 @@ export default function App() {
                 alt="Ластівка" 
                 className="h-12 md:h-16 w-auto object-contain select-none hover:opacity-90 transition-opacity"
               />
-              <p className="text-[10px] text-gray-400 font-sans tracking-wide uppercase mt-1">{lang === 'ru' ? 'Бутик женского белья' : 'Бутік жіночої білизни'}</p>
             </div>
           </div>
 
@@ -1351,7 +1350,7 @@ export default function App() {
             </div>
             <div className="flex flex-col text-left">
               <span className="text-xs font-bold text-gray-800 font-sans tracking-wide">096-048-67-14</span>
-              <span className="text-[10px] text-gray-400 font-medium">Ольга, {lang === 'ru' ? 'Консультант' : 'Консультант'}</span>
+              <span className="text-[10px] text-gray-400 font-medium">Ольга</span>
             </div>
           </div>
 
@@ -1753,28 +1752,6 @@ export default function App() {
         {/* Left column sidebar for searching, filter specs, pricing bounds */}
         <div className="lg:col-span-1 space-y-6">
           
-          {/* Quick Search Panel */}
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder={t.searchPlh}
-                className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-300 text-gray-800 placeholder-gray-400 focus:border-[#e02484] focus:ring-1 focus:ring-[#e02484] rounded-lg text-xs focus:outline-none transition-all font-sans"
-              />
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
-              {searchQuery && (
-                <button 
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-800"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* Dynamic Category Navigation pills */}
           <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
             <button 

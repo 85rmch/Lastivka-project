@@ -77,10 +77,21 @@ async function initTelegramBot() {
 
         if (!payload) {
           await ctx.reply(
-            "🌸 *Ласкаво просимо до магазину Ластівка!*\n\n" +
-            "Раді вітати вас! Тут ви можете ознайомитися з нашим вишуканим асортиментом жіночої білизни та одягу, оформити замовлення та стежити за його статусом.",
+            "🌸 *Вітаємо в інтернет-магазині «Ластівка»!*\n\n" +
+            "Ваш простір вишуканої жіночої білизни, ніжного домашнього одягу та стильного трикотажу.\n\n" +
+            "📩 *Маєте запитання?* Просто напишіть нам у чат, і ми з радістю допоможемо!",
             {
-              parse_mode: "Markdown"
+              parse_mode: "Markdown",
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: "Перейти до магазину 🛍",
+                      url: "https://lastivka-wine.vercel.app/"
+                    }
+                  ]
+                ]
+              }
             }
           );
           return;
@@ -569,6 +580,7 @@ router.post("/api/products/update", async (req, res) => {
     }
 
     const dbProduct: any = {
+      product_code: product.product_code,
       name: product.name,
       category: product.category,
       description: product.description,

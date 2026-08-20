@@ -17,6 +17,8 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
     ru: {
       editTitle: 'Редактирование:',
       nameLabel: 'Название',
+      productCodeLabel: 'Код товара',
+      vendorCodeLabel: 'Артикул',
       selectCategory: 'Выберите категорию...',
       descLabel: 'Описание',
       priceLabel: 'Цена',
@@ -40,6 +42,8 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
     ua: {
       editTitle: 'Редагування:',
       nameLabel: 'Назва',
+      productCodeLabel: 'Код товару',
+      vendorCodeLabel: 'Артикул',
       selectCategory: 'Оберіть категорію...',
       descLabel: 'Опис',
       priceLabel: 'Ціна',
@@ -100,6 +104,30 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
         </div>
         
         <input type="text" placeholder={t.nameLabel} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />
+        
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.productCodeLabel}</label>
+            <input 
+              type="text" 
+              placeholder={t.productCodeLabel} 
+              value={formData.product_code || ''} 
+              onChange={e => setFormData({...formData, product_code: e.target.value})} 
+              className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
+            />
+          </div>
+          <div>
+            <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.vendorCodeLabel}</label>
+            <input 
+              type="text" 
+              placeholder={t.vendorCodeLabel} 
+              value={formData.vendor_code || ''} 
+              onChange={e => setFormData({...formData, vendor_code: e.target.value})} 
+              className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
+            />
+          </div>
+        </div>
+
         <select className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
           value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
           <option value="" disabled>{t.selectCategory}</option>

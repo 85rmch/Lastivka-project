@@ -774,7 +774,7 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                             </button>
                             <button
                                 onClick={handleConfirmStatusChange}
-                                className="px-4 py-2 font-bold text-white bg-[#e02484] hover:bg-[#c0146f] rounded-xl transition-colors cursor-pointer shadow-sm active:scale-98"
+                                className="px-4 py-2 font-bold text-white bg-[#e02484] hover:bg-[#c0146f] rounded-xl transition-colors cursor-pointer"
                             >
                                 {t.confirm}
                             </button>
@@ -783,50 +783,17 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                 </div>
             )}
 
-            {/* Lightbox / Zoom Image Modal */}
-            {zoomedImage && (
-                <div 
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md transition-opacity duration-300"
-                    onClick={() => setZoomedImage(null)}
-                >
-                    <button 
-                        onClick={() => setZoomedImage(null)}
-                        className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 text-white hover:text-gray-200 rounded-full transition-colors cursor-pointer"
-                        title={t.close}
-                    >
-                        <X className="w-6 h-6" />
-                    </button>
-                    <div 
-                        className="relative max-w-full max-h-[85vh] flex items-center justify-center overflow-hidden rounded-xl bg-white/5 border border-white/10 shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <img 
-                            src={zoomedImage} 
-                            alt={lang === 'ru' ? 'Увеличенное изображение' : 'Збільшене зображення'} 
-                            referrerPolicy="no-referrer"
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                if (target.src !== 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=600&auto=format&fit=crop') {
-                                    target.src = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=600&auto=format&fit=crop';
-                                }
-                            }}
-                            className="max-w-[90vw] max-h-[80vh] md:max-w-4xl object-contain rounded-lg shadow-2xl" 
-                        />
-                    </div>
-                </div>
-            )}
-
             {/* History and Statistics Modal */}
             {showHistoryModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl border border-gray-100 max-h-[90vh] flex flex-col">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 sm:p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-6 max-w-3xl w-full shadow-2xl border border-gray-100 max-h-[96vh] md:max-h-[90vh] flex flex-col m-1 sm:m-2">
                         {/* Header */}
-                        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-3 md:pb-4 mb-3 md:mb-4 shrink-0">
                             <div className="flex items-center gap-2">
                                 <BarChart3 className="w-5 h-5 text-[#e02484]" />
                                 <div>
-                                    <h3 className="font-extrabold text-gray-900 text-base">{t.historyTitle}</h3>
-                                    <p className="text-xs text-gray-400">{t.historySub}</p>
+                                    <h3 className="font-extrabold text-gray-900 text-sm md:text-base">{t.historyTitle}</h3>
+                                    <p className="text-[11px] text-gray-400">{t.historySub}</p>
                                 </div>
                             </div>
                             <button
@@ -838,27 +805,27 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                         </div>
 
                         {/* Date Pickers */}
-                        <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-5">
+                        <div className="grid grid-cols-2 gap-2.5 md:gap-4 bg-gray-50 p-3 md:p-4 rounded-xl md:rounded-2xl border border-gray-100 mb-3 md:mb-5 shrink-0">
                             <div>
-                                <label className="block text-[10px] font-extrabold text-gray-400 mb-1 uppercase tracking-wider flex items-center gap-1">
+                                <label className="block text-[9px] md:text-[10px] font-extrabold text-gray-400 mb-1 uppercase tracking-wider flex items-center gap-1">
                                     <Calendar className="w-3 h-3 text-[#e02484]" /> {t.dateFrom}
                                 </label>
                                 <input
                                     type="date"
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
-                                    className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-800 focus:ring-1 focus:ring-[#e02484] focus:outline-none shadow-sm cursor-pointer"
+                                    className="w-full p-2 md:p-2.5 bg-white border border-gray-200 rounded-lg md:rounded-xl text-[11px] md:text-xs font-semibold text-gray-800 focus:ring-1 focus:ring-[#e02484] focus:outline-none shadow-sm cursor-pointer"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-extrabold text-gray-400 mb-1 uppercase tracking-wider flex items-center gap-1">
+                                <label className="block text-[9px] md:text-[10px] font-extrabold text-gray-400 mb-1 uppercase tracking-wider flex items-center gap-1">
                                     <Calendar className="w-3 h-3 text-[#e02484]" /> {t.dateTo}
                                 </label>
                                 <input
                                     type="date"
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
-                                    className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-800 focus:ring-1 focus:ring-[#e02484] focus:outline-none shadow-sm cursor-pointer"
+                                    className="w-full p-2 md:p-2.5 bg-white border border-gray-200 rounded-lg md:rounded-xl text-[11px] md:text-xs font-semibold text-gray-800 focus:ring-1 focus:ring-[#e02484] focus:outline-none shadow-sm cursor-pointer"
                                 />
                             </div>
                         </div>
@@ -878,25 +845,25 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
 
                             return (
                                 <>
-                                    <div className="grid grid-cols-3 gap-3 mb-4">
-                                        <div className="bg-green-50/50 border border-green-100 p-4 rounded-2xl text-center">
-                                            <p className="text-[10px] font-bold text-green-700 uppercase tracking-wider mb-1">{t.statShipped}</p>
-                                            <p className="text-xl font-extrabold text-green-900">{totalOrders} шт</p>
+                                    <div className="grid grid-cols-3 gap-1.5 md:gap-3 mb-3 md:mb-4 shrink-0">
+                                        <div className="bg-green-50/50 border border-green-100 p-2 md:p-4 rounded-xl md:rounded-2xl text-center flex flex-col justify-center">
+                                            <p className="text-[9px] md:text-[10px] font-bold text-green-700 uppercase tracking-wider mb-0.5 md:mb-1">{t.statShipped}</p>
+                                            <p className="text-xs sm:text-sm md:text-xl font-extrabold text-green-900 truncate">{totalOrders} шт</p>
                                         </div>
-                                        <div className="bg-amber-50/50 border border-amber-100 p-4 rounded-2xl text-center">
-                                            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1">{t.statSum}</p>
-                                            <p className="text-xl font-extrabold text-amber-900">{totalSum.toLocaleString()} {t.totalUnit}</p>
+                                        <div className="bg-amber-50/50 border border-amber-100 p-2 md:p-4 rounded-xl md:rounded-2xl text-center flex flex-col justify-center">
+                                            <p className="text-[9px] md:text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-0.5 md:mb-1">{t.statSum}</p>
+                                            <p className="text-xs sm:text-sm md:text-xl font-extrabold text-amber-900 truncate">{totalSum.toLocaleString()} {t.totalUnit}</p>
                                         </div>
-                                        <div className="bg-indigo-50/50 border border-indigo-100 p-4 rounded-2xl text-center">
-                                            <p className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider mb-1">{t.statAvg}</p>
-                                            <p className="text-xl font-extrabold text-indigo-900">{avgValue.toLocaleString()} {t.totalUnit}</p>
+                                        <div className="bg-indigo-50/50 border border-indigo-100 p-2 md:p-4 rounded-xl md:rounded-2xl text-center flex flex-col justify-center">
+                                            <p className="text-[9px] md:text-[10px] font-bold text-indigo-700 uppercase tracking-wider mb-0.5 md:mb-1">{t.statAvg}</p>
+                                            <p className="text-xs sm:text-sm md:text-xl font-extrabold text-indigo-900 truncate">{avgValue.toLocaleString()} {t.totalUnit}</p>
                                         </div>
                                     </div>
 
                                     {/* Export & Print actions */}
                                     {totalOrders > 0 && (
-                                        <div className="flex flex-wrap gap-2 mb-4 bg-gray-50 p-2.5 rounded-2xl border border-gray-100 justify-end items-center">
-                                            <span className="text-[10px] font-bold text-gray-400 mr-auto uppercase tracking-wider pl-1">{t.exportLabel}</span>
+                                        <div className="flex flex-wrap gap-1.5 md:gap-2 mb-3 md:mb-4 bg-gray-50 p-2 md:p-2.5 rounded-xl md:rounded-2xl border border-gray-100 justify-end items-center shrink-0">
+                                            <span className="text-[9px] md:text-[10px] font-bold text-gray-400 mr-auto uppercase tracking-wider pl-1 hidden sm:inline">{t.exportLabel}</span>
                                             
                                             <button
                                                 onClick={() => {
@@ -996,8 +963,8 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                                                         </html>
                                                     `);
                                                     printWindow.document.close();
-                                                }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-[#e02484] hover:text-[#c0146f] rounded-xl text-[10px] font-bold transition-all cursor-pointer border border-pink-100 active:scale-95"
+                                                 }}
+                                                className="flex items-center gap-1 px-2.5 py-1.5 bg-pink-50 hover:bg-pink-100 text-[#e02484] hover:text-[#c0146f] rounded-lg text-[10px] font-bold transition-all cursor-pointer border border-pink-100 active:scale-95"
                                                 title={t.tooltipPrint}
                                             >
                                                 <Printer className="w-3.5 h-3.5" />
@@ -1047,7 +1014,7 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                                                     link.click();
                                                     document.body.removeChild(link);
                                                 }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 rounded-xl text-[10px] font-bold transition-all cursor-pointer border border-emerald-100 active:scale-95"
+                                                className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 rounded-lg text-[10px] font-bold transition-all cursor-pointer border border-emerald-100 active:scale-95"
                                                 title={t.tooltipCsv}
                                             >
                                                 <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -1100,7 +1067,7 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                                                     link.click();
                                                     document.body.removeChild(link);
                                                 }}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 rounded-xl text-[10px] font-bold transition-all cursor-pointer border border-gray-200 active:scale-95"
+                                                className="flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 rounded-lg text-[10px] font-bold transition-all cursor-pointer border border-gray-200 active:scale-95"
                                                 title={t.tooltipJson}
                                             >
                                                 <Download className="w-3.5 h-3.5" />
@@ -1131,19 +1098,19 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                                                 const isExpanded = !!expandedOrders[`history_${order.id}`];
 
                                                 return (
-                                                    <div key={order.id} className="bg-gray-50 border border-gray-100 rounded-2xl p-4 space-y-2 text-xs text-left">
+                                                    <div key={order.id} className="bg-gray-50 border border-gray-100 rounded-xl md:rounded-2xl p-3 md:p-4 space-y-2 text-xs text-left">
                                                         <div className="flex items-center justify-between">
                                                             <span className="font-extrabold text-gray-900">{t.orderNum}{String(order.id || '').slice(0, 8)}</span>
-                                                            <span className="text-gray-400 font-mono text-[10px]">
+                                                            <span className="text-gray-400 font-mono text-[9px] md:text-[10px]">
                                                                 {order.created_at ? new Date(order.created_at).toLocaleString(lang === 'ru' ? 'ru-RU' : 'uk-UA') : ''}
                                                             </span>
                                                         </div>
 
-                                                        <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-600">
-                                                            <div>👤 <strong>{String(order.customer_name || (lang === 'ru' ? 'Без имени' : 'Без імені'))}</strong></div>
-                                                            <div>📞 <span className="font-mono">{String(order.customer_phone || (lang === 'ru' ? 'Без телефона' : 'Без телефону'))}</span></div>
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 md:gap-2 text-[10px] md:text-[11px] text-gray-600">
+                                                            <div className="truncate">👤 <strong>{String(order.customer_name || (lang === 'ru' ? 'Без имени' : 'Без імені'))}</strong></div>
+                                                            <div className="font-mono truncate">📞 <span>{String(order.customer_phone || (lang === 'ru' ? 'Без телефона' : 'Без телефону'))}</span></div>
                                                             {order.delivery_info && (
-                                                                <div className="col-span-2 text-gray-500 italic mt-0.5 leading-tight">
+                                                                <div className="sm:col-span-2 text-gray-500 italic mt-0.5 leading-normal break-words">
                                                                     📍 {String(order.delivery_info)}
                                                                 </div>
                                                             )}
@@ -1216,7 +1183,7 @@ export default function AdminOrders({ adminPassword, lang = 'ua' }: { adminPassw
                         })()}
 
                         {/* Footer */}
-                        <div className="border-t border-gray-100 pt-4 mt-4 flex justify-end">
+                        <div className="border-t border-gray-100 pt-3 md:pt-4 mt-3 md:mt-4 flex justify-end shrink-0">
                             <button
                                 onClick={() => setShowHistoryModal(false)}
                                 className="px-5 py-2 font-bold text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs transition-colors cursor-pointer"

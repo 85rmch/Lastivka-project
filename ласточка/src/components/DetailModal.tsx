@@ -251,7 +251,7 @@ export default function DetailModal({
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500 font-mono mb-6">
             <span>{t.code}: <strong className="text-gray-800">{product.product_code}</strong></span>
-            {product.vendor_code && product.vendor_code !== '---' && (
+            {showPriceMargin && product.vendor_code && product.vendor_code !== '---' && (
               <>
                 <span className="text-gray-300">|</span>
                 <span>{t.vendor}: <strong className="text-gray-800">{product.vendor_code}</strong></span>

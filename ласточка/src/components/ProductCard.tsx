@@ -167,7 +167,7 @@ export default function ProductCard({
       <div className="p-2.5 sm:p-4 flex flex-col flex-1 bg-white">
         {/* Code & Availability bar */}
         <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-gray-400 mb-1 font-mono">
-          <span>{product.vendor_code && product.vendor_code !== '---' ? `${t.vendor}: ${product.vendor_code}` : ''}</span>
+          <span>{showPriceMargin && product.vendor_code && product.vendor_code !== '---' ? `${t.vendor}: ${product.vendor_code}` : ''}</span>
           <span className="flex items-center gap-1 font-semibold text-emerald-600">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             {t.stock}
@@ -188,11 +188,6 @@ export default function ProductCard({
           {product.sizes ? `${lang === 'ru' ? 'Размеры' : 'Розміри'}: ${product.sizes}. ` : ''}
           {product.name.includes('Код') ? maybeTranslate(product.name.split('.').slice(1).join('.'), lang) : ''}
         </p>
-
-        {/* Stars decoration precisely like screenshot: ☆ ☆ ☆ ☆ ☆ */}
-        <div className="flex gap-0.5 text-[10px] sm:text-xs text-gray-300 mb-2 sm:mb-3 select-none">
-          <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
-        </div>
 
         {/* Margin Profits / Manager mode info */}
         {showPriceMargin && (

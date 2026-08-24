@@ -552,21 +552,8 @@ create policy "Allow public update access on orders" on orders for update using 
 
           {activeTab === 'products' && (
               <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    <button 
-                        onClick={() => setSelectedCategory('all')}
-                        className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase ${selectedCategory === 'all' ? 'bg-[#d4af37] text-black' : 'bg-[#161616] text-[#a19992]'}`}
-                    >{lang === 'ru' ? 'Все' : 'Всі'}</button>
-                    {CATEGORIES.filter(c => c.key !== 'all').map(cat => (
-                        <button 
-                            key={cat.key}
-                            onClick={() => setSelectedCategory(cat.key)}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase ${selectedCategory === cat.key ? 'bg-[#d4af37] text-black' : 'bg-[#161616] text-[#a19992]'}`}
-                        >{lang === 'ru' ? cat.labelRu : cat.labelUa}</button>
-                    ))}
-                  </div>
                   <div className="p-2 bg-[#121212] border border-white/10 rounded-xl">
-                    <AdminProductList isOpen={isOpen} onConfigChange={onConfigChange} selectedCategory={selectedCategory === 'all' ? undefined : selectedCategory} lang={lang} />
+                    <AdminProductList isOpen={isOpen} onConfigChange={onConfigChange} selectedCategory={undefined} lang={lang} />
                   </div>
               </div>
           )}

@@ -90,54 +90,49 @@ export default function AdminProductList({ isOpen, onConfigChange, selectedCateg
         )}
       </div>
 
-      {totalFilteredCount === 0 && (
+      {filteredProducts.length === 0 && (
         <div className="text-center py-8 text-gray-500 text-xs">
           {lang === 'ru' ? 'Ничего не найдено по вашему запросу' : 'Нічого не знайдено за вашим запитом'}
         </div>
       )}
       
-      {Object.entries(groupedProducts).map(([category, items]) => (
-        <div key={category} className="space-y-3">
-          <h3 className="text-[#d4af37] text-xs font-bold uppercase tracking-wider">{getCategoryLabel(category)}</h3>
-           <div className="grid grid-cols-1 gap-4">
-            {(items as Product[]).map(product => (
-              <div key={product.id} className="p-5 bg-[#161616] hover:bg-[#1a1a1a] border border-white/10 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition-all shadow-sm">
-                <div className="flex items-start sm:items-center gap-5 w-full">
-                  <img 
-                    src={getCleanImage(product, 0)} 
-                    alt={product.name} 
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      if (target.src !== 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=200&auto=format&fit=crop') {
-                        target.src = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=200&auto=format&fit=crop';
-                      }
-                    }}
-                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover bg-[#121212] border border-white/5 shrink-0" 
-                  />
-                  <div className="flex-1 space-y-1.5">
-                    <h4 className="text-white text-base font-bold">{product.name}</h4>
-                    <p className="text-[#a19992] text-sm">{lang === 'ru' ? 'Код:' : 'Код:'} {product.product_code}</p>
-                    {product.vendor_code && <p className="text-[#6b645d] text-xs">{lang === 'ru' ? 'Артикул:' : 'Артикул:'} {product.vendor_code}</p>}
-                    <div className="flex flex-wrap items-center gap-4 mt-2 pt-2 border-t border-white/5">
-                        <span className="text-[#d4af37] font-semibold text-sm">{product.price} ₴</span>
-                        <span className="text-[#a19992] text-xs bg-[#222] px-2 py-1 rounded-md">{lang === 'ru' ? 'Остаток:' : 'Залишок:'} {product.stock} {lang === 'ru' ? 'шт' : 'шт'}</span>
-                        {product.sizes && <span className="text-[#a19992] text-xs bg-[#222] px-2 py-1 rounded-md">{lang === 'ru' ? 'Размеры:' : 'Розміри:'} {product.sizes}</span>}
-                    </div>
-                  </div>
+      <div className="grid grid-cols-1 gap-4">
+        {filteredProducts.map(product => (
+          <div key={product.id} className="p-5 bg-[#161616] hover:bg-[#1a1a1a] border border-white/10 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition-all shadow-sm">
+            <div className="flex items-start sm:items-center gap-5 w-full">
+              <img 
+                src={getCleanImage(product, 0)} 
+                alt={product.name} 
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (target.src !== 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=200&auto=format&fit=crop') {
+                    target.src = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=200&auto=format&fit=crop';
+                  }
+                }}
+                className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover bg-[#121212] border border-white/5 shrink-0" 
+              />
+              <div className="flex-1 space-y-1.5">
+                <h4 className="text-white text-base font-bold">{product.name}</h4>
+                <p className="text-[#a19992] text-sm">{lang === 'ru' ? 'Код:' : 'Код:'} {product.product_code}</p>
+                {product.vendor_code && <p className="text-[#6b645d] text-xs">{lang === 'ru' ? 'Артикул:' : 'Артикул:'} {product.vendor_code}</p>}
+                <div className="flex flex-wrap items-center gap-4 mt-2 pt-2 border-t border-white/5">
+                    <span className="text-[#d4af37] font-semibold text-sm">{product.price} ₴</span>
+                    <span className="text-[#a19992] text-xs bg-[#222] px-2 py-1 rounded-md">{lang === 'ru' ? 'Остаток:' : 'Залишок:'} {product.stock} {lang === 'ru' ? 'шт' : 'шт'}</span>
+                    {product.sizes && <span className="text-[#a19992] text-xs bg-[#222] px-2 py-1 rounded-md">{lang === 'ru' ? 'Размеры:' : 'Розміри:'} {product.sizes}</span>}
                 </div>
-                <button
-                  onClick={() => setEditingProduct(product)}
-                  className="p-3 w-full sm:w-auto bg-white/5 hover:bg-[#d4af37] text-white hover:text-black rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  <span className="text-xs font-bold sm:hidden">{lang === 'ru' ? 'Редактировать' : 'Редагувати'}</span>
-                </button>
               </div>
-            ))}
+            </div>
+            <button
+              onClick={() => setEditingProduct(product)}
+              className="p-3 w-full sm:w-auto bg-white/5 hover:bg-[#d4af37] text-white hover:text-black rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
+            >
+              <Edit className="w-4 h-4" />
+              <span className="text-xs font-bold sm:hidden">{lang === 'ru' ? 'Редактировать' : 'Редагувати'}</span>
+            </button>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

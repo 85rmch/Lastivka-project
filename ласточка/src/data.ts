@@ -3,13 +3,14 @@ import { Product, CategoryKey, CategoryInfo } from './types';
 export const CATEGORIES: CategoryInfo[] = [
   { key: 'all', labelRu: 'Все товары', labelUa: 'Всі товари', icon: 'Sparkles' },
   { key: 'new', labelRu: 'Новинки', labelUa: 'Новинки', icon: 'Star' },
-  { key: 'pajamas', labelRu: 'Пижамы и домашняя одежда', labelUa: 'Піжами та домашній одяг', icon: 'Shirt' },
-  { key: 'underwear', labelRu: 'Нижнее белье и Эротика', labelUa: 'Нижня білизна та Еротика', icon: 'Heart' },
-  { key: 'panties', labelRu: 'Трусики', labelUa: 'Трусики', icon: 'Heart' },
-  { key: 'thermals', labelRu: 'Термобелье', labelUa: 'Термобілизна', icon: 'Flame' },
-  { key: 'socks', labelRu: 'Носки, колготки, лосины', labelUa: 'Шкарпетки, колготки, лосини', icon: 'Footprints' },
-  { key: 'jeggings', labelRu: 'Джеггинсы, леггинсы, брюки', labelUa: 'Джегінси, легінси, штани', icon: 'Layers' },
-  { key: 'games', labelRu: 'Настольные игры 18+', labelUa: 'Настільні ігри 18+', icon: 'Gamepad2' },
+  { key: 'bras', labelRu: 'Бюстгальтеры', labelUa: 'БЮСТГАЛЬТЕРИ', icon: 'Heart' },
+  { key: 'panties', labelRu: 'Трусики', labelUa: 'ТРУСИКИ', icon: 'Heart' },
+  { key: 'home', labelRu: 'Одежда для дома', labelUa: 'ОДЯГ ДЛЯ ДОМУ', icon: 'Shirt' },
+  { key: 'swimwear', labelRu: 'Купальники', labelUa: 'КУПАЛЬНИКИ', icon: 'Sun' },
+  { key: 'sets', labelRu: 'Комплекты белья', labelUa: 'КОМПЛЕКТИ БІЛИЗНИ', icon: 'Layers' },
+  { key: 'thermals', labelRu: 'Термобелье', labelUa: 'ТЕРМОБІЛИЗНА', icon: 'Flame' },
+  { key: 'erotic', labelRu: 'Эротическое белье', labelUa: 'ЕРОТИЧНА БІЛИЗНА', icon: 'Zap' },
+  { key: 'toys_accessories', labelRu: 'Игрушки и аксессуары', labelUa: 'ІГРАШКИ ТА АКСЕСУАРИ', icon: 'Gamepad2' },
 ];
 
 export const RAW_PRODUCTS_DATA = [
@@ -1265,31 +1266,113 @@ export const RAW_PRODUCTS_DATA = [
   }
 ];
 
-export function getProductCategory(p: { name: string; product_code: string }): CategoryKey {
-  const nameLower = p.name.toLowerCase();
-  const codeLower = p.product_code.toLowerCase();
+export function isProductInCategory(product: { name: string; product_code: string; category?: string; photo?: string[]; vendor_code?: string; description?: string }, categoryKey: string): boolean {
+  if (!categoryKey || categoryKey === 'all') return true;
+  if (categoryKey === 'new') return true;
 
-  if (nameLower.includes('піжама') || nameLower.includes('піжамка') || nameLower.includes('дому')) {
-    return 'pajamas';
+  const catLower = (product.category || '').toLowerCase();
+  const nameLower = (product.name || '').toLowerCase();
+  const codeLower = (product.product_code || '').toLowerCase();
+  const vendorLower = (product.vendor_code || '').toLowerCase();
+  const photoPathsJoined = Array.isArray(product.photo) ? product.photo.join(' ').toLowerCase() : '';
+  const firstLetter = product.product_code ? product.product_code.trim().charAt(0).toUpperCase() : '';
+
+  // Direct category string match from DB
+  if (catLower === categoryKey.toLowerCase()) return true;
+
+  // Negative checks to prevent cross-category false positives
+  const isLegwearOrSocks = nameLower.includes('колготки') || nameLower.includes('шкарпетки') || nameLower.includes('панчохи') || nameLower.includes('гольфи') || nameLower.includes('гамаші') || nameLower.includes('джегінси') || nameLower.includes('джеггінси') || nameLower.includes('лосини') || nameLower.includes('легінси') || nameLower.includes('джинси');
+  const isThermal = nameLower.includes('термо') || nameLower.includes('термобілиз');
+  const isToyOrGame = nameLower.includes('гра ') || nameLower.includes('настільна гра') || nameLower.includes('вібратор') || nameLower.includes('ділдо') || nameLower.includes('мастурбатор') || nameLower.includes('лубрикант') || nameLower.includes('смазка');
+  const isSwim = nameLower.includes('купальник') || codeLower.startsWith('ку') || codeLower.startsWith('ky') || codeLower.startsWith('kу');
+
+  switch (categoryKey) {
+    case 'bras':
+      if (catLower === 'bras' || catLower === 'bra' || catLower === 'бюстгальтеры' || catLower === 'бюстгальтери') return true;
+      if (isLegwearOrSocks || isThermal || isToyOrGame || isSwim) return false;
+      if (photoPathsJoined.includes('bras_bralets') || photoPathsJoined.includes('%20-%20bras_bralets')) return true;
+      if (nameLower.includes('бюст') || nameLower.includes('бюстик') || nameLower.includes('ліф') || nameLower.includes('лиф') || nameLower.includes('бралет') || nameLower.includes('бралетт') || (nameLower.includes('топ') && !nameLower.includes('піжам') && !nameLower.includes('пижам'))) return true;
+      if ((firstLetter === 'Б' || firstLetter === 'B') && !nameLower.includes('боді')) return true;
+      return false;
+
+    case 'panties':
+      if (catLower === 'panties' || catLower === 'трусики' || catLower === 'трусы') return true;
+      if (isLegwearOrSocks || isThermal || isToyOrGame) return false;
+      if (photoPathsJoined.includes('panties') || photoPathsJoined.includes('%20-%20panties')) return true;
+      if (nameLower.includes('трусики') || nameLower.includes('труси') || nameLower.includes('стрінги') || nameLower.includes('стринги') || nameLower.includes('бразиліани') || nameLower.includes('бразилианы') || nameLower.includes('шортики') || nameLower.includes('сліпи') || nameLower.includes('слипы') || nameLower.includes('танга') || nameLower.includes('панталони') || nameLower.includes('боксери') || nameLower.includes('сімейні') || nameLower.includes('семейные')) return true;
+      if ((firstLetter === 'Т' || firstLetter === 'T') && !nameLower.includes('топ') && !nameLower.includes('термо')) return true;
+      return false;
+
+    case 'home':
+    case 'pajamas':
+      if (catLower === 'home' || catLower === 'pajamas' || catLower === 'одежда для дома' || catLower === 'одяг для дому' || catLower === 'пижамы') return true;
+      if (isThermal || isLegwearOrSocks || isToyOrGame || isSwim) return false;
+      if (photoPathsJoined.includes('pajamas') || photoPathsJoined.includes('%20-%20pajamas') || photoPathsJoined.includes('shubki') || photoPathsJoined.includes('%20-%20shubki')) return true;
+      if (nameLower.includes('піжама') || nameLower.includes('пижама') || nameLower.includes('халат') || nameLower.includes('сороч') || nameLower.includes('ніч') || nameLower.includes('дому') || (nameLower.includes('костюм') && !nameLower.includes('ігровий') && !nameLower.includes('еротич'))) return true;
+      return false;
+
+    case 'swimwear':
+      if (catLower === 'swimwear' || catLower === 'swim' || catLower === 'купальники') return true;
+      if (isLegwearOrSocks || isThermal || isToyOrGame) return false;
+      if (nameLower.includes('купальник') || (nameLower.includes('плавки') && (nameLower.includes('дитяч') || nameLower.includes('чоловіч') || nameLower.includes('жіноч') || nameLower.includes('пляжн')))) return true;
+      if (codeLower.startsWith('ку') || codeLower.startsWith('ky') || codeLower.startsWith('kу')) return true;
+      return false;
+
+    case 'sets':
+      if (catLower === 'sets' || catLower === 'комплекты' || catLower === 'комплекти') return true;
+      if (isThermal || isSwim || isToyOrGame || isLegwearOrSocks) return false;
+      if (photoPathsJoined.includes('sets') || photoPathsJoined.includes('%20-%20sets')) return true;
+      if ((nameLower.includes('комплект') || nameLower.includes('набір') || nameLower.includes('набор')) && !nameLower.includes('еротичн') && !nameLower.includes('сексуальн') && !nameLower.includes('ігровий')) return true;
+      return false;
+
+    case 'thermals':
+      if (catLower === 'thermals' || catLower === 'thermal' || catLower === 'термобелье' || catLower === 'термобілизна') return true;
+      if (isThermal) return true;
+      return false;
+
+    case 'erotic':
+      if (catLower === 'erotic' || catLower === 'эротическое' || catLower === 'еротична') return true;
+      if (isToyOrGame || isThermal) return false;
+      if (photoPathsJoined.includes('erotic') || photoPathsJoined.includes('%20-%20erotic') || photoPathsJoined.includes('lingerie') || photoPathsJoined.includes('%20-%20lingerie')) return true;
+      if (nameLower.includes('еротичн') || nameLower.includes('еротика') || nameLower.includes('сексуальн') || nameLower.includes('сексі') || nameLower.includes('боді') || nameLower.includes('игровой') || nameLower.includes('ігровий') || nameLower.includes('корсет') || nameLower.includes('пестіси') || nameLower.includes('пестисы') || nameLower.includes('пеньюар')) return true;
+      return false;
+
+    case 'toys_accessories':
+    case 'games':
+      if (catLower === 'toys_accessories' || catLower === 'games' || catLower === 'игрушки' || catLower === 'іграшки') return true;
+      if (isToyOrGame || photoPathsJoined.includes('game') || photoPathsJoined.includes('toy') || photoPathsJoined.includes('accessory')) return true;
+      if (nameLower.includes('іграшки') || nameLower.includes('аксесуари') || nameLower.includes('маска') || nameLower.includes('стреп') || nameLower.includes('бретель') || nameLower.includes('подовжувач') || nameLower.includes('контейнер') || nameLower.includes('наручники') || nameLower.includes('кляп') || nameLower.includes('бандаж') || nameLower.includes('пестіси') || nameLower.includes('затискачі') || nameLower.includes('bdsm') || nameLower.includes('бдсм')) return true;
+      return false;
+
+    case 'socks':
+      if (catLower === 'socks' || catLower === 'носки' || catLower === 'шкарпетки') return true;
+      if (nameLower.includes('шкарпетки') || nameLower.includes('гольфи') || nameLower.includes('колготки') || nameLower.includes('панчохи')) return true;
+      return false;
+
+    case 'jeggings':
+      if (catLower === 'jeggings' || catLower === 'лосины' || catLower === 'легінси') return true;
+      if (nameLower.includes('гамаші') || nameLower.includes('джегінси') || nameLower.includes('джеггінси') || nameLower.includes('штани') || nameLower.includes('лосини') || nameLower.includes('легінси') || nameLower.includes('джинси')) return true;
+      return false;
+
+    default:
+      return catLower === categoryKey.toLowerCase();
   }
-  if (nameLower.includes('гра ') || nameLower.includes('настільна')) {
-    return 'games';
+}
+
+export function getProductCategory(p: { name: string; product_code: string; category?: string; photo?: string[]; vendor_code?: string; description?: string }): CategoryKey {
+  if (p.category && p.category !== 'all' && p.category !== 'other') {
+    return p.category as CategoryKey;
   }
-  if (nameLower.includes('трусики') || nameLower.includes('труси') || nameLower.includes('стрінги') || nameLower.includes('бразиліани') || nameLower.includes('сліпи') || nameLower.includes('панталони') || nameLower.includes('плавки') || nameLower.includes('боксери') || nameLower.includes('сімейні')) {
-    return 'panties';
-  }
-  if (nameLower.includes('бюстик') || nameLower.includes('еротичн') || nameLower.includes('сексуальн') || nameLower.includes('купальник') || nameLower.includes('наручники')) {
-    return 'underwear';
-  }
-  if (nameLower.includes('термо') || nameLower.includes('термобілиз')) {
-    return 'thermals';
-  }
-  if (nameLower.includes('шкарпетки') || nameLower.includes('гольфи') || nameLower.includes('колготки') || nameLower.includes('панчохи')) {
-    return 'socks';
-  }
-  if (nameLower.includes('гамаші') || nameLower.includes('джегінси') || nameLower.includes('джеггінси') || nameLower.includes('штани') || nameLower.includes('лосини') || nameLower.includes('легінси') || nameLower.includes('джинси')) {
-    return 'jeggings';
-  }
+  if (isProductInCategory(p, 'toys_accessories')) return 'toys_accessories';
+  if (isProductInCategory(p, 'erotic')) return 'erotic';
+  if (isProductInCategory(p, 'home')) return 'home';
+  if (isProductInCategory(p, 'thermals')) return 'thermals';
+  if (isProductInCategory(p, 'swimwear')) return 'swimwear';
+  if (isProductInCategory(p, 'sets')) return 'sets';
+  if (isProductInCategory(p, 'bras')) return 'bras';
+  if (isProductInCategory(p, 'panties')) return 'panties';
+  if (isProductInCategory(p, 'socks')) return 'socks';
+  if (isProductInCategory(p, 'jeggings')) return 'jeggings';
   return 'other';
 }
 
@@ -1444,3 +1527,71 @@ export function getCleanImage(product: Product, index: number = 0): string {
   const list = unsplashCategories[categoryKey] || unsplashCategories.underwear || unsplashCategories.other;
   return list[Math.abs(index) % list.length];
 }
+
+export interface ColorOption {
+  ua: string;
+  ru: string;
+  keys: string[];
+}
+
+export const OFFICIAL_COLORS: ColorOption[] = [
+  { ua: 'Червоно-бежевий', ru: 'Красно-бежевый', keys: ['червоно-бежевий', 'красно-бежевый', 'красно бежевый'] },
+  { ua: 'Чорно-бежевий', ru: 'Черно-бежевый', keys: ['чорно-бежевий', 'черно-бежевый', 'черно бежевый'] },
+  { ua: 'Леопард', ru: 'Леопард', keys: ['леопард', 'леопардовый', 'леопардовий'] },
+  { ua: 'Пудра', ru: 'Пудра', keys: ['пудра', 'пудровый', 'пудровий'] },
+  { ua: 'Сливовий', ru: 'Сливовый', keys: ['сливовий', 'сливовый', 'слива'] },
+  { ua: 'Фіолетовий', ru: 'Фиолетовый', keys: ['фіолетивний', 'фіолетовий', 'фиолетовый', 'фиолет'] },
+  { ua: 'Бузковий', ru: 'Сиреневый', keys: ['бузковий', 'сиреневый', 'сирень'] },
+  { ua: 'Синій', ru: 'Синий', keys: ['синій', 'синий', 'синяя', 'синее'] },
+  { ua: 'Світло-сірий', ru: 'Светло-серый', keys: ['світло-сірий', 'светло-серый', 'светло серый'] },
+  { ua: 'Темно-сірий', ru: 'Темно-серый', keys: ['темно-сірий', 'темно-серый', 'темно серый', 'графіт', 'графит'] },
+  { ua: 'Бежевий', ru: 'Бежевый', keys: ['бежевий', 'бежевый', 'беж', 'тілесний', 'телесный'] },
+  { ua: 'Мікс кольорів', ru: 'Микс цветов', keys: ['мікс кольорів', 'микс цветов', 'мікс', 'микс', 'різні кольори', 'разные цвета', 'разноцветный'] },
+  { ua: 'Бірюзовий', ru: 'Бирюзовый', keys: ['бірюзовий', 'бирюзовый', 'бирюза'] },
+  { ua: 'Бордо', ru: 'Бордо', keys: ['бордо', 'бордовый', 'бордовий'] },
+  { ua: 'Блакитний', ru: 'Голубой', keys: ['блакитний', 'голубой', 'голубая'] },
+  { ua: 'Гірчичний', ru: 'Горчичный', keys: ['гірчичний', 'горчичный', 'горчица'] },
+  { ua: 'Жовтий', ru: 'Желтый', keys: ['жовтий', 'желтый', 'жёлтый'] },
+  { ua: 'Зелений', ru: 'Зеленый', keys: ['зелений', 'зеленый', 'зелёный', 'хаки', 'хакі'] },
+  { ua: 'Кораловий', ru: 'Коралловый', keys: ['кораловий', 'коралл', 'коралловый'] },
+  { ua: 'Коричневий', ru: 'Коричневый', keys: ['коричневий', 'коричневый', 'шоколад'] },
+  { ua: 'Червоний', ru: 'Красный', keys: ['червоний', 'красный', 'красная'] },
+  { ua: 'Малиновий', ru: 'Малиновый', keys: ['малиновий', 'малиновый', 'малина'] },
+  { ua: 'Молочний', ru: 'Молочный', keys: ['молочний', 'молочный', 'молоко'] },
+  { ua: 'Памаранчевий', ru: 'Оранжевый', keys: ['памаранчевий', 'помаранчевий', 'оранжевый', 'оранж'] },
+  { ua: 'Рожевий', ru: 'Розовый', keys: ['рожевий', 'розовый', 'розовая'] },
+  { ua: 'Срібний', ru: 'Серебряный', keys: ['срібний', 'серебряный', 'серебро'] },
+  { ua: 'Золотий', ru: 'Золотой', keys: ['золотий', 'золотой', 'золото'] },
+  { ua: 'Чорний', ru: 'Черный', keys: ['чорний', 'черный', 'чёрный', 'черная'] },
+  { ua: 'Білий', ru: 'Белый', keys: ['білий', 'белый', 'белая'] },
+  { ua: 'Салатовий', ru: 'Салатовый', keys: ['салатовий', 'салатовый'] },
+  { ua: 'Капучіно', ru: 'Капучино', keys: ['капучіно', 'капучино'] },
+  { ua: 'Мокка', ru: 'Мокка', keys: ['мокка', 'мокко'] },
+  { ua: 'Персиковий', ru: 'Персиковый', keys: ['персиковий', 'персиковый', 'персик'] },
+  { ua: 'Марсал', ru: 'Марсала', keys: ['марсал', 'марсала'] },
+  { ua: 'Коричнево-бежевий', ru: 'Коричнево-бежевый', keys: ['коричнево-бежевий', 'коричнево-бежевый', 'коричнево бежевый'] },
+  { ua: 'Чорно-білий', ru: 'Черно-белый', keys: ['чорно-білий', 'черно-белый', 'черно белый'] },
+  { ua: 'Фуксія', ru: 'Фуксия', keys: ['фуксія', 'фуксия'] },
+  { ua: 'Молочно-бежевий', ru: 'Молочно-бежевый', keys: ['молочно-бежевий', 'молочно-бежевый', 'молочно бежевый'] },
+  { ua: 'Оливковий', ru: 'Оливковый', keys: ['оливковий', 'оливковый', 'олива'] },
+  { ua: 'Камуфляж', ru: 'Камуфляж', keys: ['камуфляж', 'камуфляжный'] },
+];
+
+export function matchProductColor(productColorStr: string | undefined | null, selectedColorVal: string): boolean {
+  if (!selectedColorVal || selectedColorVal === 'all') return true;
+  if (!productColorStr) return false;
+  
+  const targetLower = selectedColorVal.toLowerCase();
+  const prodLower = productColorStr.toLowerCase();
+
+  const matchedConfig = OFFICIAL_COLORS.find(
+    c => c.ua.toLowerCase() === targetLower || c.ru.toLowerCase() === targetLower
+  );
+
+  if (matchedConfig) {
+    return matchedConfig.keys.some(k => prodLower.includes(k)) || prodLower.includes(matchedConfig.ua.toLowerCase()) || prodLower.includes(matchedConfig.ru.toLowerCase());
+  }
+
+  return prodLower.includes(targetLower);
+}
+

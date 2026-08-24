@@ -76,7 +76,7 @@ export default function AdminProductList({ isOpen, onConfigChange, selectedCateg
           type="text"
           value={adminSearch}
           onChange={e => setAdminSearch(e.target.value)}
-          placeholder={lang === 'ru' ? 'Поиск по названию, коду, артикулу, цвету...' : 'Пошук за назвою, кодом, артикулом, кольором...'}
+          placeholder={lang === 'ru' ? 'Поиск модного белья...' : 'Пошук модної білизни...'}
           className="w-full pl-10 pr-10 py-3 bg-[#1a1a1a] border border-white/10 text-white placeholder-gray-500 focus:border-[#d4af37] focus:ring-1 focus:ring-[#d4af37] rounded-xl text-xs focus:outline-none transition-all font-sans"
         />
         <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-3.5" />

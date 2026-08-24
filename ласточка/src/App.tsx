@@ -32,7 +32,7 @@ import {
   Globe,
   Mail, Home, Clock, CornerUpRight, Share, Eye, EyeOff, Instagram, ArrowRight} from 'lucide-react';
 import { Product, CategoryKey, CartItem, Order, BlogPost } from './types';
-import { CATEGORIES, PRODUCTS, getCleanImage, cleanImageUrl } from './data';
+import { CATEGORIES, PRODUCTS, getCleanImage, cleanImageUrl, OFFICIAL_COLORS, matchProductColor, isProductInCategory } from './data';
 import { fetchSupabaseProducts, getStoredConfig, getDemoProducts, getAuthClient, fetchSupabaseBlogPosts, saveSupabaseBlogPost, deleteSupabaseBlogPost } from './lib/supabase';
 import ProductCard from './components/ProductCard';
 import DetailModal from './components/DetailModal';
@@ -74,22 +74,6 @@ const HERO_SLIDES = [
   }
 ];
 
-const PANTIES_SUBTYPES = [
-  { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
-  { id: 1, ru: "Стринги", ua: "Стрінги", match: ["стрінг", "стринг", "string", "thong"] },
-  { id: 2, ru: "Бразилианы", ua: "Бразиліани", match: ["бразил", "brazil"] },
-  { id: 3, ru: "Слипы", ua: "Сліпи", match: ["сліп", "слип", "slip"] },
-  { id: 4, ru: "Шорты", ua: "Шорти", match: ["шорт", "short"] },
-  { id: 5, ru: "Баталы", ua: "Батали", match: ["батал", "великих", "больших"] },
-  { id: 6, ru: "Бесшовные", ua: "Безшовні", match: ["безшов", "бесшов", "seamless", "лазер"] },
-  { id: 7, ru: "Корректирующие", ua: "Корегуючі", match: ["корегу", "коррект", "утяж", "моделю"] },
-  { id: 8, ru: "Панталоны", ua: "Панталони", match: ["панталон"] },
-  { id: 9, ru: "Мужские плавки", ua: "Чоловічі плавки", match: ["плавки"] },
-  { id: 10, ru: "Мужские семейные", ua: "Чоловічі семейні", match: ["сімейн", "семейн", "сімейки", "семейки"] },
-  { id: 11, ru: "Мужские боксеры", ua: "Чоловічі боксери", match: ["боксер"] },
-  { id: 12, ru: "Наборы трусиков", ua: "Набори трусиків", match: ["набір", "набор", "комплект трус"] },
-];
-
 const BRA_SUBTYPES = [
   { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
   { id: 1, ru: "Тонкий поролон", ua: "Тонкий поролон", match: ["тонкий", "thin"] },
@@ -108,49 +92,65 @@ const BRA_SUBTYPES = [
   { id: 14, ru: "Топы", ua: "Топи", match: ["top", "топ"] },
 ];
 
+const PANTIES_SUBTYPES = [
+  { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
+  { id: 1, ru: "Стринги", ua: "Стрінги", match: ["стрінг", "стринг", "string", "thong"] },
+  { id: 2, ru: "Бразилианы", ua: "Бразиліани", match: ["бразил", "brazil"] },
+  { id: 3, ru: "Слипы", ua: "Сліпи", match: ["сліп", "слип", "slip"] },
+  { id: 4, ru: "Шорты", ua: "Шорти", match: ["шорт", "short"] },
+  { id: 5, ru: "Баталы", ua: "Батали", match: ["батал", "великих", "больших"] },
+  { id: 6, ru: "Бесшовные", ua: "Безшовні", match: ["безшов", "бесшов", "seamless", "лазер"] },
+  { id: 7, ru: "Корректирующие", ua: "Корегуючі", match: ["корегу", "коррект", "утяж", "моделю"] },
+  { id: 8, ru: "Панталоны", ua: "Панталони", match: ["панталон"] },
+  { id: 9, ru: "Мужские плавки", ua: "Чоловічі плавки", match: ["плавки", "мужс", "чоловіч"] },
+  { id: 10, ru: "Мужские семейные", ua: "Чоловічі сімейні", match: ["сімейн", "семейн", "сімейки", "семейки"] },
+  { id: 11, ru: "Мужские боксеры", ua: "Чоловічі боксери", match: ["боксер"] },
+  { id: 12, ru: "Наборы трусиков", ua: "Набори трусиків", match: ["набір", "набор", "комплект трус"] },
+];
+
 const PAJAMA_SUBTYPES = [
   { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
   { id: 1, ru: "Халаты", ua: "Халати", match: ["халат"] },
-  { id: 2, ru: "Пижама с шортами", ua: "Піжама з шортами", match: ["піжам", "пижам", "шорт"] },
-  { id: 3, ru: "Пижама со штанами", ua: "Піжама зі штанами", match: ["піжам", "пижам", "штан"] },
+  { id: 2, ru: "Пижама с шортами", ua: "Піжама з шортами", match: ["шорт"] },
+  { id: 3, ru: "Пижама со штанами", ua: "Піжама зі штанами", match: ["штан", "брюк"] },
   { id: 4, ru: "Ночные сорочки", ua: "Нічні сорочки", match: ["сороч", "ночн", "ніч"] },
-  { id: 5, ru: "Теплые пижамы", ua: "Теплі піжами", match: ["піжам", "пижам", "тепл"] },
+  { id: 5, ru: "Теплые пижамы", ua: "Теплі піжами", match: ["тепл", "махр", "фліс", "флис"] },
   { id: 6, ru: "Велосипедки", ua: "Велосипедки", match: ["велосипед"] },
-  { id: 7, ru: "Лосины", ua: "Лосини", match: ["лосин"] },
-  { id: 8, ru: "Одежда для дома", ua: "Одяг для дому", match: ["дому"] },
+  { id: 7, ru: "Лосины", ua: "Лосини", match: ["лосин", "леггинс"] },
+  { id: 8, ru: "Одежда для дома", ua: "Одяг для дому", match: ["дому", "одяг"] },
 ];
 
 const SWIMWEAR_SUBTYPES = [
   { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
-  { id: 1, ru: "Женские открытые", ua: "Жіночі відкриті", match: ["купальник", "відкрит"] },
-  { id: 2, ru: "Женские закрытые", ua: "Жіночі закриті", match: ["купальник", "закрит"] },
+  { id: 1, ru: "Женские открытые", ua: "Жіночі відкриті", match: ["відкрит", "открыт", "роздільн", "раздельный", "бікіні", "bikini"] },
+  { id: 2, ru: "Женские закрытые", ua: "Жіночі закриті", match: ["закрит", "закрыт", "суцільн", "сплошной", "монокіні", "monokini"] },
   { id: 3, ru: "Женские плавки", ua: "Жіночі плавки", match: ["плавки", "жіноч"] },
   { id: 4, ru: "Мужские плавки", ua: "Чоловічі плавки", match: ["плавки", "чоловіч"] },
-  { id: 5, ru: "Детские купальники", ua: "Дитячі купальники", match: ["купальник", "дит"] },
-  { id: 6, ru: "Чашка поролон", ua: "Чашка поролон", match: ["поролон", "чашк"] },
-  { id: 7, ru: "Мягкая чашка", ua: "М'яка чашка", match: ["м'яка", "мягка", "чашк"] },
+  { id: 5, ru: "Детские купальники", ua: "Дитячі купальники", match: ["дит", "детс"] },
+  { id: 6, ru: "Чашка поролон", ua: "Чашка поролон", match: ["поролон"] },
+  { id: 7, ru: "Мягкая чашка", ua: "М'яка чашка", match: ["м'яка", "мягк"] },
 ];
 
 const SET_SUBTYPES = [
   { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
-  { id: 1, ru: "Кружевные", ua: "Мережевні", match: ["мережив", "кружев"] },
+  { id: 1, ru: "Кружевные", ua: "Мережевні", match: ["мереж", "кружев"] },
   { id: 2, ru: "На поролоне", ua: "На поролоні", match: ["поролон"] },
-  { id: 3, ru: "Пуш-ап/корректор", ua: "Пуш-ап/коректор", match: ["пуш", "корект"] },
+  { id: 3, ru: "Пуш-ап/корректор", ua: "Пуш-ап/коректор", match: ["пуш", "корект", "коррект"] },
   { id: 4, ru: "Бралетт-комплект", ua: "Бралет-комплект", match: ["bra", "бралет"] },
   { id: 5, ru: "Боди", ua: "Боді", match: ["боді", "боди"] },
   { id: 6, ru: "Комплекты с топами", ua: "Комплекти з топами", match: ["комплект", "топ"] },
   { id: 7, ru: "Без поролона", ua: "Без поролону", match: ["без поролон"] },
-  { id: 8, ru: "С тонким поролоном", ua: "З тонким поролоном", match: ["тонкий", "поролон"] },
+  { id: 8, ru: "С тонким поролоном", ua: "З тонким поролоном", match: ["тонким", "поролон"] },
   { id: 9, ru: "Бесшовные", ua: "Безшовні", match: ["безшов", "бесшов"] },
   { id: 10, ru: "Спортивные", ua: "Спортивні", match: ["спорт"] },
-  { id: 11, ru: "Эротические", ua: "Еротичні", match: ["еротичн"] },
+  { id: 11, ru: "Эротические", ua: "Еротичні", match: ["еротич", "эротич"] },
 ];
 
 const THERMAL_SUBTYPES = [
   { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
-  { id: 1, ru: "Женское", ua: "Жіноча", match: ["жіноч"] },
-  { id: 2, ru: "Мужское", ua: "Чоловіча", match: ["чоловіч"] },
-  { id: 3, ru: "Детское", ua: "Дитяча", match: ["дит"] },
+  { id: 1, ru: "Женская", ua: "Жіноча", match: ["жіноч", "женс"] },
+  { id: 2, ru: "Мужская", ua: "Чоловіча", match: ["чоловіч", "мужс"] },
+  { id: 3, ru: "Детская", ua: "Дитяча", match: ["дит", "детс"] },
 ];
 
 const EROTIC_SUBTYPES = [
@@ -162,18 +162,36 @@ const EROTIC_SUBTYPES = [
   { id: 5, ru: "Боди", ua: "Боді", match: ["боді", "боди"] },
   { id: 6, ru: "Пояса для чулок", ua: "Пояси для панчох", match: ["пояс"] },
   { id: 7, ru: "Халаты", ua: "Халати", match: ["халат"] },
-  { id: 8, ru: "Мужчинам", ua: "Чоловікам", match: ["чоловіч"] },
+  { id: 8, ru: "Мужчинам", ua: "Чоловікам", match: ["чоловіч", "мужчин"] },
+];
+
+const TOYS_SUBTYPES = [
+  { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
+  { id: 1, ru: "Маски", ua: "Маски", match: ["маск"] },
+  { id: 2, ru: "Стрепы", ua: "Стреп", match: ["стреп"] },
+  { id: 3, ru: "Бретельки", ua: "Бретельки", match: ["бретел"] },
+  { id: 4, ru: "Удлинители", ua: "Подовжувачі", match: ["подовжувач", "удлините"] },
+  { id: 5, ru: "Контейнеры для стирки", ua: "Контейнери для прання", match: ["контейнер", "прання", "стирк"] },
+  { id: 6, ru: "Пояса для чулок", ua: "Пояси для панчох", match: ["пояс"] },
+  { id: 7, ru: "Вибраторы и дилдо", ua: "Вібратори і ділдо", match: ["вібратор", "вибратор", "ділдо", "дилдо"] },
+  { id: 8, ru: "Мастурбаторы", ua: "Мастурбатори", match: ["мастурбат"] },
+  { id: 9, ru: "Эрекционные кольца и насадки", ua: "Ерекційні кільця і насадки", match: ["кільця", "кольца", "насадк", "ерекційн"] },
+  { id: 10, ru: "Вагинальные шарики", ua: "Вагінальні кульки", match: ["кульк", "шарик", "вагінальн", "вагинальн"] },
+  { id: 11, ru: "Анальные пробки", ua: "Анальні пробки", match: ["анальн", "пробк", "втулк"] },
+  { id: 12, ru: "Игры", ua: "Ігри", match: ["ігр", "игр"] },
+  { id: 13, ru: "BDSM фетиш", ua: "BDSM фетиш", match: ["bdsm", "бдсм", "фетиш", "пліть", "плеть", "наручник", "кляп"] },
+  { id: 14, ru: "Лубриканты", ua: "Лубриканти", match: ["лубрикант", "смазк"] },
 ];
 
 const MENU_TRANSLATIONS: Record<string, { ru: string; ua: string }> = {
-  'ЭРОТИЧЕСКОЕ': { ru: 'ЭРОТИЧЕСКОЕ', ua: 'ЕРОТИКА' },
-  'БЮСТГАЛЬТЕРЫ': { ru: 'БЮСТГАЛЬТЕРЫ', ua: 'БЮСТГАЛЬТЕРИ' },
-  'ДЛЯ ДОМА': { ru: 'ДЛЯ ДОМА', ua: 'ДЛЯ ДОМУ' },
-  'КОМПЛЕКТЫ': { ru: 'КОМПЛЕКТЫ', ua: 'КОМПЛЕКТИ' },
-  'КУПАЛЬНИКИ': { ru: 'КУПАЛЬНИКИ', ua: 'КУПАЛЬНИКИ' },
+  'БЮСТГАЛЬТЕРИ': { ru: 'БЮСТГАЛЬТЕРЫ', ua: 'БЮСТГАЛЬТЕРИ' },
   'ТРУСИКИ': { ru: 'ТРУСИКИ', ua: 'ТРУСИКИ' },
-  'КОЛГОТКИ, НОСКИ': { ru: 'КОЛГОТКИ, НОСКИ', ua: 'КОЛГОТКИ, ШКАРПЕТКИ' },
-  'РАСПРОДАЖА': { ru: 'РАСПРОДАЖА', ua: 'РОЗПРОДАЖ' },
+  'ОДЯГ ДЛЯ ДОМУ': { ru: 'ОДЕЖДА ДЛЯ ДОМА', ua: 'ОДЯГ ДЛЯ ДОМУ' },
+  'КУПАЛЬНИКИ': { ru: 'КУПАЛЬНИКИ', ua: 'КУПАЛЬНИКИ' },
+  'КОМПЛЕКТИ БІЛИЗНИ': { ru: 'КОМПЛЕКТЫ БЕЛЬЯ', ua: 'КОМПЛЕКТИ БІЛИЗНИ' },
+  'ТЕРМОБІЛИЗНА': { ru: 'ТЕРМОБЕЛЬЕ', ua: 'ТЕРМОБІЛИЗНА' },
+  'ЕРОТИЧНА БІЛИЗНА': { ru: 'ЭРОТИЧЕСКОЕ БЕЛЬЕ', ua: 'ЕРОТИЧНА БІЛИЗНА' },
+  'ІГРАШКИ ТА АКСЕСУАРИ': { ru: 'ИГРУШКИ И АКСЕССУАРЫ', ua: 'ІГРАШКИ ТА АКСЕСУАРИ' },
   'НОВИНКИ': { ru: 'НОВИНКИ', ua: 'НОВИНКИ' },
   'БЛОГ': { ru: 'БЛОГ', ua: 'БЛОГ' },
 };
@@ -233,6 +251,7 @@ export default function App() {
   const [selectedSetType, setSelectedSetType] = useState<number>(0);
   const [selectedThermalType, setSelectedThermalType] = useState<number>(0);
   const [selectedEroticType, setSelectedEroticType] = useState<number>(0);
+  const [selectedToysType, setSelectedToysType] = useState<number>(0);
   const [selectedMenu, setSelectedMenu] = useState<string>('all');
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
   const [maxPrice, setMaxPrice] = useState<number>(1200);
@@ -558,15 +577,41 @@ export default function App() {
   };
 
   // Compute colors, sizes and prices dynamically from products to feed filter options
-  const allUniqueColors = Array.from(
-    new Set(allProducts.flatMap(p => p.color ? p.color.split(',').map(s => s.trim()) : []))
-  ).filter(c => c !== '') as string[];
-
   const allUniqueSizes = Array.from(
     new Set(allProducts.flatMap(p => p.sizes ? p.sizes.split(',').map(s => s.trim()) : []))
   ).filter(s => s !== '' && s !== '1' && s !== '---') as string[];
 
   const maxProductPrice = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.price)) : 1200;
+
+  // Helper to map menu items to CategoryKeys
+  const getCategoryKeyFromMenu = (menuName: string): CategoryKey | null => {
+    switch (menuName) {
+      case 'БЮСТГАЛЬТЕРИ':
+      case 'БЮСТГАЛЬТЕРЫ':
+        return 'bras';
+      case 'ТРУСИКИ':
+        return 'panties';
+      case 'ОДЯГ ДЛЯ ДОМУ':
+      case 'ДЛЯ ДОМА':
+        return 'home';
+      case 'КУПАЛЬНИКИ':
+        return 'swimwear';
+      case 'КОМПЛЕКТИ БІЛИЗНИ':
+      case 'КОМПЛЕКТЫ':
+        return 'sets';
+      case 'ТЕРМОБІЛИЗНА':
+        return 'thermals';
+      case 'ЕРОТИЧНА БІЛИЗНА':
+      case 'ЭРОТИЧЕСКОЕ':
+        return 'erotic';
+      case 'ІГРАШКИ ТА АКСЕСУАРИ':
+        return 'toys_accessories';
+      case 'НОВИНКИ':
+        return 'new';
+      default:
+        return null;
+    }
+  };
 
   // Filter & Search computation
   const filteredProducts = allProducts.filter(product => {
@@ -579,216 +624,133 @@ export default function App() {
       (product.color && product.color.toLowerCase().includes(text));
 
     // 2. Category selection
-    // Bypass strict category match if a smart menu is selected, so custom DB categories don't block results
     const matchesCategory = selectedCategory === 'favorites'
       ? favorites.includes(product.id)
-      : (selectedMenu !== 'all' && selectedCategory !== 'favorites') 
-        ? true 
-        : (selectedCategory === 'all' || product.category === selectedCategory);
+      : isProductInCategory(product, selectedCategory);
 
     // 3. Price limit
     const matchesPrice = product.price <= maxPrice;
 
     // 4. Color filter
-    const matchesColor = selectedColor === 'all' || (product.color && product.color.includes(selectedColor));
+    const matchesColor = selectedColor === 'all' || matchProductColor(product.color, selectedColor);
 
     // 5. Sizes filter
     const productSizesList = product.sizes ? product.sizes.split(',').map(s => s.trim()) : [];
     const matchesSizes = selectedSizes.length === 0 || selectedSizes.some(sz => productSizesList.includes(sz));
 
-    // 6. Brand Menu item-specific precise filtering (e.g. "ТРУСИКИ", "БЮСТГАЛЬТЕРЫ" within the broad underwear category)
+    // 6. Brand Menu item-specific precise filtering & subcategories
     let matchesMenu = true;
     if (selectedMenu !== 'all') {
-      const nameLower = product.name.toLowerCase();
-      const codeLower = product.product_code.toLowerCase();
-      const firstLetter = product.product_code.trim().charAt(0).toUpperCase();
-      const isCyrillicT = firstLetter === 'Т';
-      const isLatinT = firstLetter === 'T';
-      const isCyrillicB = firstLetter === 'Б';
-      const isLatinB = firstLetter === 'B';
-      const isCyrillicK = firstLetter === 'К';
-      const isLatinK = firstLetter === 'K';
-      const isCyrillicE = firstLetter === 'Е';
-      const isLatinE = firstLetter === 'E';
-      const isCyrillicCH = firstLetter === 'Ч';
-      const isLatinCH = firstLetter === 'CH' || firstLetter === 'C';
-      const isCyrillicA = firstLetter === 'А';
-      const isLatinA = firstLetter === 'A';
-      const isCyrillicD = firstLetter === 'Д';
-      const isLatinD = firstLetter === 'D';
-      const isCyrillicP = firstLetter === 'П';
-      const isLatinP = firstLetter === 'P';
-      const isCyrillicSH = firstLetter === 'Ш';
-      const isLatinSH = firstLetter === 'S' || firstLetter === 'H';
+      const menuCatKey = getCategoryKeyFromMenu(selectedMenu);
+      if (menuCatKey) {
+        matchesMenu = isProductInCategory(product, menuCatKey);
+      } else {
+        matchesMenu = true;
+      }
 
-      const photoPathsJoined = (product.photo || []).join(' ').toLowerCase();
+      if (matchesMenu) {
+        const nameLower = product.name.toLowerCase();
+        const codeLower = product.product_code.toLowerCase();
+        const catLower = (product.category || '').toLowerCase();
+        const vendorLower = (product.vendor_code || '').toLowerCase();
 
-      if (selectedMenu === 'ТРУСИКИ') {
-        const isPantyCode = isCyrillicT || isLatinT;
-        const isPantyFolder = photoPathsJoined.includes('panties') || photoPathsJoined.includes('%20-%20panties');
-        const isPantyName = nameLower.includes('трусики') || nameLower.includes('труси') || nameLower.includes('стрінги') || nameLower.includes('стринги') || nameLower.includes('бразиліани') || nameLower.includes('бразилианы') || nameLower.includes('шортики') || nameLower.includes('сліпи') || nameLower.includes('слипы') || nameLower.includes('танга') || nameLower.includes('панталони') || nameLower.includes('плавки') || nameLower.includes('боксери') || nameLower.includes('сімейні');
-        matchesMenu = isPantyCode || isPantyFolder || isPantyName;
-
-        if (matchesMenu && selectedPantiesType !== 0) {
+        if (selectedMenu === 'ТРУСИКИ' && selectedPantiesType !== 0) {
           const subType = PANTIES_SUBTYPES.find(t => t.id === selectedPantiesType);
           if (subType) {
-            const catLower = (product.category || '').toLowerCase();
-            const vendorLower = (product.vendor_code || '').toLowerCase();
-            const matchedSubType = subType.match.some(m => 
+            const matched = subType.match.some(m => 
               nameLower.includes(m) || 
               codeLower.includes(m) || 
               catLower.includes(m) || 
               vendorLower.includes(m) || 
               product.description?.toLowerCase().includes(m)
             );
-            if (!matchedSubType) {
-              matchesMenu = false;
-            }
+            if (!matched) matchesMenu = false;
           }
-        }
-      } else if (selectedMenu === 'БЮСТГАЛЬТЕРЫ') {
-        const isBraCode = isCyrillicB || isLatinB;
-        const isBraFolder = photoPathsJoined.includes('bras_bralets') || photoPathsJoined.includes('%20-%20bras_bralets');
-        const isBraName = nameLower.includes('бюст') || nameLower.includes('бюстик') || nameLower.includes('ліф') || nameLower.includes('лиф') || nameLower.includes('бралет') || nameLower.includes('бралетт');
-        matchesMenu = isBraCode || isBraFolder || isBraName;
-        
-        if (matchesMenu && selectedBraType !== 0) {
+        } else if ((selectedMenu === 'БЮСТГАЛЬТЕРИ' || selectedMenu === 'БЮСТГАЛЬТЕРЫ') && selectedBraType !== 0) {
           const subType = BRA_SUBTYPES.find(t => t.id === selectedBraType);
           if (subType) {
-            const catLower = (product.category || '').toLowerCase();
-            const vendorLower = (product.vendor_code || '').toLowerCase();
-            const matchedSubType = subType.match.some(m => 
+            const matched = subType.match.some(m => 
               nameLower.includes(m) || 
               codeLower.includes(m) || 
               catLower.includes(m) || 
               vendorLower.includes(m) || 
               product.description?.toLowerCase().includes(m)
             );
-            if (!matchedSubType) {
-              matchesMenu = false;
-            }
+            if (!matched) matchesMenu = false;
           }
-        }
-      } else if (selectedMenu === 'КОМПЛЕКТЫ') {
-        const isSetFolder = photoPathsJoined.includes('sets') || photoPathsJoined.includes('%20-%20sets');
-        const isSetName = (nameLower.includes('комплект') || nameLower.includes('набір') || nameLower.includes('набор')) && !nameLower.includes('еротичн') && !nameLower.includes('сексуальн');
-        const isSetCode = (isCyrillicK || isLatinK) && !photoPathsJoined.includes('tights_socks') && !photoPathsJoined.includes('jeggings') && !photoPathsJoined.includes('swim');
-        matchesMenu = isSetFolder || isSetName || isSetCode;
-        
-        if (matchesMenu && selectedSetType !== 0) {
-          const subType = SET_SUBTYPES.find(t => t.id === selectedSetType);
-          if (subType) {
-            const catLower = (product.category || '').toLowerCase();
-            const vendorLower = (product.vendor_code || '').toLowerCase();
-            const matchedSubType = subType.match.some(m => 
-              nameLower.includes(m) || 
-              codeLower.includes(m) || 
-              catLower.includes(m) || 
-              vendorLower.includes(m) || 
-              product.description?.toLowerCase().includes(m)
-            );
-            if (!matchedSubType) {
-              matchesMenu = false;
-            }
-          }
-        }
-      } else if (selectedMenu === 'КУПАЛЬНИКИ') {
-        const isSwimCode = codeLower.startsWith('ку') || codeLower.startsWith('ky') || codeLower.startsWith('kу');
-        const isSwimFolder = photoPathsJoined.includes('swim') || photoPathsJoined.includes('%20-%20swim');
-        const isSwimName = nameLower.includes('купальник') || nameLower.includes('плавки');
-        matchesMenu = isSwimCode || isSwimFolder || isSwimName;
-        
-        if (matchesMenu && selectedSwimwearType !== 0) {
-          const subType = SWIMWEAR_SUBTYPES.find(t => t.id === selectedSwimwearType);
-          if (subType) {
-            const catLower = (product.category || '').toLowerCase();
-            const vendorLower = (product.vendor_code || '').toLowerCase();
-            const matchedSubType = subType.match.some(m => 
-              nameLower.includes(m) || 
-              codeLower.includes(m) || 
-              catLower.includes(m) || 
-              vendorLower.includes(m) || 
-              product.description?.toLowerCase().includes(m)
-            );
-            if (!matchedSubType) {
-              matchesMenu = false;
-            }
-          }
-        }
-      } else if (selectedMenu === 'ДЛЯ ДОМА') {
-        const isPajamaName = nameLower.includes('піжама') || nameLower.includes('пижама') || nameLower.includes('халат') || nameLower.includes('сороч') || nameLower.includes('ніч');
-        matchesMenu = isPajamaName;
-        
-        if (matchesMenu && selectedPajamaType !== 0) {
+        } else if ((selectedMenu === 'ОДЯГ ДЛЯ ДОМУ' || selectedMenu === 'ДЛЯ ДОМА') && selectedPajamaType !== 0) {
           const subType = PAJAMA_SUBTYPES.find(t => t.id === selectedPajamaType);
           if (subType) {
-            const catLower = (product.category || '').toLowerCase();
-            const vendorLower = (product.vendor_code || '').toLowerCase();
-            const matchedSubType = subType.match.some(m => 
+            const matched = subType.match.some(m => 
               nameLower.includes(m) || 
               codeLower.includes(m) || 
               catLower.includes(m) || 
               vendorLower.includes(m) || 
               product.description?.toLowerCase().includes(m)
             );
-            if (!matchedSubType) {
-              matchesMenu = false;
-            }
+            if (!matched) matchesMenu = false;
           }
-        }
-      } else if (selectedMenu === 'ТЕРМОБІЛИЗНА') {
-        const isThermalName = nameLower.includes('термо');
-        matchesMenu = isThermalName;
-        
-        if (matchesMenu && selectedThermalType !== 0) {
+        } else if (selectedMenu === 'КУПАЛЬНИКИ' && selectedSwimwearType !== 0) {
+          const subType = SWIMWEAR_SUBTYPES.find(t => t.id === selectedSwimwearType);
+          if (subType) {
+            const matched = subType.match.some(m => 
+              nameLower.includes(m) || 
+              codeLower.includes(m) || 
+              catLower.includes(m) || 
+              vendorLower.includes(m) || 
+              product.description?.toLowerCase().includes(m)
+            );
+            if (!matched) matchesMenu = false;
+          }
+        } else if ((selectedMenu === 'КОМПЛЕКТИ БІЛИЗНИ' || selectedMenu === 'КОМПЛЕКТЫ') && selectedSetType !== 0) {
+          const subType = SET_SUBTYPES.find(t => t.id === selectedSetType);
+          if (subType) {
+            const matched = subType.match.some(m => 
+              nameLower.includes(m) || 
+              codeLower.includes(m) || 
+              catLower.includes(m) || 
+              vendorLower.includes(m) || 
+              product.description?.toLowerCase().includes(m)
+            );
+            if (!matched) matchesMenu = false;
+          }
+        } else if (selectedMenu === 'ТЕРМОБІЛИЗНА' && selectedThermalType !== 0) {
           const subType = THERMAL_SUBTYPES.find(t => t.id === selectedThermalType);
           if (subType) {
-            const catLower = (product.category || '').toLowerCase();
-            const vendorLower = (product.vendor_code || '').toLowerCase();
-            const matchedSubType = subType.match.some(m => 
+            const matched = subType.match.some(m => 
               nameLower.includes(m) || 
               codeLower.includes(m) || 
               catLower.includes(m) || 
               vendorLower.includes(m) || 
               product.description?.toLowerCase().includes(m)
             );
-            if (!matchedSubType) {
-              matchesMenu = false;
-            }
+            if (!matched) matchesMenu = false;
           }
-        }
-      } else if (selectedMenu === 'ЭРОТИЧЕСКОЕ') {
-        const isEroticFolder = photoPathsJoined.includes('erotic') || photoPathsJoined.includes('%20-%20erotic') || photoPathsJoined.includes('lingerie') || photoPathsJoined.includes('%20-%20lingerie');
-        const isEroticCode = isCyrillicE || isLatinE || isCyrillicA || isLatinA || isCyrillicCH || isLatinCH;
-        const isEroticName = nameLower.includes('еротичн') || nameLower.includes('еротика') || nameLower.includes('сексуальн') || nameLower.includes('сексі') || nameLower.includes('боді') || nameLower.includes('игровой') || nameLower.includes('ігровий') || nameLower.includes('корсет') || nameLower.includes('маска') || nameLower.includes('наручники') || nameLower.includes('кляп') || nameLower.includes('бандаж') || nameLower.includes('пестіси') || nameLower.includes('пестисы') || nameLower.includes('затискачі') || nameLower.includes('чокер') || nameLower.includes('батіг') || nameLower.includes('хлыст') || nameLower.includes('флогер');
-        matchesMenu = isEroticFolder || isEroticCode || isEroticName;
-        
-        if (matchesMenu && selectedEroticType !== 0) {
+        } else if ((selectedMenu === 'ЕРОТИЧНА БІЛИЗНА' || selectedMenu === 'ЭРОТИЧЕСКОЕ') && selectedEroticType !== 0) {
           const subType = EROTIC_SUBTYPES.find(t => t.id === selectedEroticType);
           if (subType) {
-            const catLower = (product.category || '').toLowerCase();
-            const vendorLower = (product.vendor_code || '').toLowerCase();
-            const matchedSubType = subType.match.some(m => 
+            const matched = subType.match.some(m => 
               nameLower.includes(m) || 
               codeLower.includes(m) || 
               catLower.includes(m) || 
               vendorLower.includes(m) || 
               product.description?.toLowerCase().includes(m)
             );
-            if (!matchedSubType) {
-              matchesMenu = false;
-            }
+            if (!matched) matchesMenu = false;
+          }
+        } else if (selectedMenu === 'ІГРАШКИ ТА АКСЕСУАРИ' && selectedToysType !== 0) {
+          const subType = TOYS_SUBTYPES.find(t => t.id === selectedToysType);
+          if (subType) {
+            const matched = subType.match.some(m => 
+              nameLower.includes(m) || 
+              codeLower.includes(m) || 
+              catLower.includes(m) || 
+              vendorLower.includes(m) || 
+              product.description?.toLowerCase().includes(m)
+            );
+            if (!matched) matchesMenu = false;
           }
         }
-      } else if (selectedMenu === 'ДЛЯ ДОМА') {
-        const isPajamaFolder = photoPathsJoined.includes('pajamas') || photoPathsJoined.includes('%20-%20pajamas') || photoPathsJoined.includes('shubki') || photoPathsJoined.includes('%20-%20shubki');
-        const isPajamaCode = isCyrillicD || isLatinD || isCyrillicP || isLatinP || isCyrillicSH || isLatinSH;
-        const isPajamaName = nameLower.includes('піжама') || nameLower.includes('піжамка') || nameLower.includes('дому') || nameLower.includes('халат') || nameLower.includes('костюм') || nameLower.includes('накидка') || nameLower.includes('штани');
-        matchesMenu = isPajamaFolder || isPajamaCode || isPajamaName;
-      } else if (selectedMenu === 'КОЛГОТКИ, НОСКИ') {
-        const isSocksFolder = photoPathsJoined.includes('tights_socks') || photoPathsJoined.includes('chulki') || photoPathsJoined.includes('%20-%20chulki') || photoPathsJoined.includes('socks') || photoPathsJoined.includes('%20-%20socks');
-        const isSocksName = nameLower.includes('шкарпетки') || nameLower.includes('гольфи') || nameLower.includes('колготки') || nameLower.includes('панчохи') || nameLower.includes('чулки') || nameLower.includes('носки');
-        matchesMenu = isSocksFolder || isSocksName;
       }
     }
 
@@ -942,7 +904,7 @@ export default function App() {
       managerToggle: 'Кабинет владельца',
       managerDesc: 'Отображает оптовую себестоимость и маржинальную прибыль по товарам.',
       managerActive: 'Режим менеджера',
-      searchPlh: 'Поиск по названию, коду товара или цвету...',
+      searchPlh: 'Поиск модного белья...',
       filtersTitle: 'Фильтры каталога',
       priceLabel: 'Максимальная цена:',
       sizesLabel: 'Размеры:',
@@ -981,7 +943,7 @@ export default function App() {
       managerToggle: 'Кабінет власника',
       managerDesc: 'Відображає оптову собівартість та маржинальний прибуток по товарах.',
       managerActive: 'Режим менеджера',
-      searchPlh: 'Пошук за назвою, кодом товару або кольором...',
+      searchPlh: 'Пошук модної білизни...',
       filtersTitle: 'Фільтри каталогу',
       priceLabel: 'Максимальна ціна:',
       sizesLabel: 'Розміри:',
@@ -1035,24 +997,16 @@ export default function App() {
       setSelectedEroticType(0);
     }
 
-    if (menuItem === 'ЭРОТИЧЕСКОЕ' || menuItem === 'БЮСТГАЛЬТЕРЫ' || menuItem === 'КОМПЛЕКТЫ' || menuItem === 'КУПАЛЬНИКИ') {
-      setSelectedCategory('underwear');
-      setSearchQuery('');
-    } else if (menuItem === 'ТРУСИКИ') {
-      setSelectedCategory('panties');
-      setSearchQuery('');
-    } else if (menuItem === 'ДЛЯ ДОМА') {
-      setSelectedCategory('pajamas');
-      setSearchQuery('');
-    } else if (menuItem === 'КОЛГОТКИ, НОСКИ') {
-      setSelectedCategory('socks');
+    const navCatKey = getCategoryKeyFromMenu(menuItem);
+    if (navCatKey) {
+      setSelectedCategory(navCatKey);
       setSearchQuery('');
     } else if (menuItem === 'РАСПРОДАЖА') {
       setSelectedCategory('all');
       setSortBy('priceAsc');
       setSearchQuery('');
     } else if (menuItem === 'НОВИНКИ') {
-      setSelectedCategory('all');
+      setSelectedCategory('new');
       setSortBy('stock');
       setSearchQuery('');
     } else {
@@ -1315,7 +1269,7 @@ export default function App() {
         <div className="flex-1 max-w-lg mx-6 relative w-full md:w-auto">
           <input
             type="text"
-            placeholder={lang === 'ru' ? 'Поиск товара...' : 'Пошук товару...'}
+            placeholder={lang === 'ru' ? 'Поиск модного белья...' : 'Пошук модної білизни...'}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="w-full border border-gray-300 rounded-md pl-4 pr-10 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#e02484] focus:ring-1 focus:ring-[#e02484] bg-white transition-all font-sans"
@@ -1435,14 +1389,14 @@ export default function App() {
       >
         <nav className="bg-[#e02484] shadow-md select-none w-full border-b border-[#c0146f] relative z-20">
           <div className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide flex items-center justify-between gap-1 py-1">
-            {['ЭРОТИЧЕСКОЕ', 'БЮСТГАЛЬТЕРЫ', 'ДЛЯ ДОМА', 'КОМПЛЕКТЫ', 'КУПАЛЬНИКИ', 'ТРУСИКИ', 'КОЛГОТКИ, НОСКИ', 'РАСПРОДАЖА', 'НОВИНКИ', 'БЛОГ'].map(menu => {
+            {['БЮСТГАЛЬТЕРИ', 'ТРУСИКИ', 'ОДЯГ ДЛЯ ДОМУ', 'КУПАЛЬНИКИ', 'КОМПЛЕКТИ БІЛИЗНИ', 'ТЕРМОБІЛИЗНА', 'ЕРОТИЧНА БІЛИЗНА', 'ІГРАШКИ ТА АКСЕСУАРИ', 'НОВИНКИ', 'БЛОГ'].map(menu => {
               const isActive = selectedMenu === menu;
               return (
                 <button
                   key={menu}
                   onClick={() => handleNavClick(menu)}
                   onMouseEnter={() => setHoveredMenu(menu)}
-                  className={`px-4 py-3 text-[11px] font-extrabold text-white tracking-widest uppercase transition-all whitespace-nowrap rounded cursor-pointer animate-none ${
+                  className={`px-3 py-3 text-[11px] font-extrabold text-white tracking-wider uppercase transition-all whitespace-nowrap rounded cursor-pointer animate-none ${
                     isActive ? 'bg-[#980f52]' : 'hover:bg-[#c0146f]'
                   }`}
                 >
@@ -1455,6 +1409,37 @@ export default function App() {
 
         {/* Mega Menu Panels */}
         <AnimatePresence initial={false}>
+          {hoveredMenu === 'БЮСТГАЛЬТЕРИ' && activeView === 'catalog' && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="absolute top-full left-0 w-full bg-white border-b border-gray-200 overflow-hidden z-10 shadow-xl origin-top"
+            >
+              <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-3 gap-x-6">
+                {BRA_SUBTYPES.map(type => (
+                  <button
+                    key={type.id}
+                    onClick={() => {
+                      setSelectedBraType(type.id);
+                      handleNavClick('БЮСТГАЛЬТЕРИ', true);
+                      setHoveredMenu(null);
+                    }}
+                    className={`text-left flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer ${
+                      selectedBraType === type.id && selectedMenu === 'БЮСТГАЛЬТЕРИ'
+                        ? 'bg-pink-50 text-[#e02484]'
+                        : 'bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#e02484]'
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${selectedBraType === type.id && selectedMenu === 'БЮСТГАЛЬТЕРИ' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
+                    {lang === 'ru' ? type.ru : type.ua}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
           {hoveredMenu === 'ТРУСИКИ' && activeView === 'catalog' && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
@@ -1486,38 +1471,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {hoveredMenu === 'БЮСТГАЛЬТЕРЫ' && activeView === 'catalog' && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="absolute top-full left-0 w-full bg-white border-b border-gray-200 overflow-hidden z-10 shadow-xl origin-top"
-            >
-              <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-3 gap-x-6">
-                {BRA_SUBTYPES.map(type => (
-                  <button
-                    key={type.id}
-                    onClick={() => {
-                      setSelectedBraType(type.id);
-                      handleNavClick('БЮСТГАЛЬТЕРЫ', true);
-                      setHoveredMenu(null);
-                    }}
-                    className={`text-left flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer ${
-                      selectedBraType === type.id && selectedMenu === 'БЮСТГАЛЬТЕРЫ'
-                        ? 'bg-pink-50 text-[#e02484]'
-                        : 'bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#e02484]'
-                    }`}
-                  >
-                    <span className={`w-1.5 h-1.5 rounded-full ${selectedBraType === type.id && selectedMenu === 'БЮСТГАЛЬТЕРЫ' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
-                    {lang === 'ru' ? type.ru : type.ua}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {hoveredMenu === 'ДЛЯ ДОМА' && activeView === 'catalog' && (
+          {hoveredMenu === 'ОДЯГ ДЛЯ ДОМУ' && activeView === 'catalog' && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -1531,16 +1485,16 @@ export default function App() {
                     key={type.id}
                     onClick={() => {
                       setSelectedPajamaType(type.id);
-                      handleNavClick('ДЛЯ ДОМА', true);
+                      handleNavClick('ОДЯГ ДЛЯ ДОМУ', true);
                       setHoveredMenu(null);
                     }}
                     className={`text-left flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer ${
-                      selectedPajamaType === type.id && selectedMenu === 'ДЛЯ ДОМА'
+                      selectedPajamaType === type.id && selectedMenu === 'ОДЯГ ДЛЯ ДОМУ'
                         ? 'bg-pink-50 text-[#e02484]'
                         : 'bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#e02484]'
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${selectedPajamaType === type.id && selectedMenu === 'ДЛЯ ДОМА' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${selectedPajamaType === type.id && selectedMenu === 'ОДЯГ ДЛЯ ДОМУ' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
                     {lang === 'ru' ? type.ru : type.ua}
                   </button>
                 ))}
@@ -1579,7 +1533,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {hoveredMenu === 'КОМПЛЕКТЫ' && activeView === 'catalog' && (
+          {hoveredMenu === 'КОМПЛЕКТИ БІЛИЗНИ' && activeView === 'catalog' && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -1593,16 +1547,16 @@ export default function App() {
                     key={type.id}
                     onClick={() => {
                       setSelectedSetType(type.id);
-                      handleNavClick('КОМПЛЕКТЫ', true);
+                      handleNavClick('КОМПЛЕКТИ БІЛИЗНИ', true);
                       setHoveredMenu(null);
                     }}
                     className={`text-left flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer ${
-                      selectedSetType === type.id && selectedMenu === 'КОМПЛЕКТЫ'
+                      selectedSetType === type.id && selectedMenu === 'КОМПЛЕКТИ БІЛИЗНИ'
                         ? 'bg-pink-50 text-[#e02484]'
                         : 'bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#e02484]'
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${selectedSetType === type.id && selectedMenu === 'КОМПЛЕКТЫ' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${selectedSetType === type.id && selectedMenu === 'КОМПЛЕКТИ БІЛИЗНИ' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
                     {lang === 'ru' ? type.ru : type.ua}
                   </button>
                 ))}
@@ -1641,7 +1595,7 @@ export default function App() {
             </motion.div>
           )}
 
-          {hoveredMenu === 'ЭРОТИЧЕСКОЕ' && activeView === 'catalog' && (
+          {hoveredMenu === 'ЕРОТИЧНА БІЛИЗНА' && activeView === 'catalog' && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -1655,16 +1609,47 @@ export default function App() {
                     key={type.id}
                     onClick={() => {
                       setSelectedEroticType(type.id);
-                      handleNavClick('ЭРОТИЧЕСКОЕ', true);
+                      handleNavClick('ЕРОТИЧНА БІЛИЗНА', true);
                       setHoveredMenu(null);
                     }}
                     className={`text-left flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer ${
-                      selectedEroticType === type.id && selectedMenu === 'ЭРОТИЧЕСКОЕ'
+                      selectedEroticType === type.id && selectedMenu === 'ЕРОТИЧНА БІЛИЗНА'
                         ? 'bg-pink-50 text-[#e02484]'
                         : 'bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#e02484]'
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${selectedEroticType === type.id && selectedMenu === 'ЭРОТИЧЕСКОЕ' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${selectedEroticType === type.id && selectedMenu === 'ЕРОТИЧНА БІЛИЗНА' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
+                    {lang === 'ru' ? type.ru : type.ua}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {hoveredMenu === 'ІГРАШКИ ТА АКСЕСУАРИ' && activeView === 'catalog' && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="absolute top-full left-0 w-full bg-white border-b border-gray-200 overflow-hidden z-10 shadow-xl origin-top"
+            >
+              <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-3 gap-x-6">
+                {TOYS_SUBTYPES.map(type => (
+                  <button
+                    key={type.id}
+                    onClick={() => {
+                      setSelectedToysType(type.id);
+                      handleNavClick('ІГРАШКИ ТА АКСЕСУАРИ', true);
+                      setHoveredMenu(null);
+                    }}
+                    className={`text-left flex items-center gap-3 px-3 py-2 text-sm font-bold rounded-lg transition-all cursor-pointer ${
+                      selectedToysType === type.id && selectedMenu === 'ІГРАШКИ ТА АКСЕСУАРИ'
+                        ? 'bg-pink-50 text-[#e02484]'
+                        : 'bg-transparent text-gray-700 hover:bg-gray-50 hover:text-[#e02484]'
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${selectedToysType === type.id && selectedMenu === 'ІГРАШКИ ТА АКСЕСУАРИ' ? 'bg-[#e02484]' : 'bg-gray-300'}`}></span>
                     {lang === 'ru' ? type.ru : type.ua}
                   </button>
                 ))}
@@ -1774,38 +1759,43 @@ export default function App() {
                   className="flex flex-col gap-1 overflow-hidden"
                 >
                   {CATEGORIES.map(cat => {
-                const isSelected = selectedCategory === cat.key && selectedMenu === 'all';
-                const count = allProducts.filter(p => cat.key === 'all' || p.category === cat.key).length;
-                
-                return (
-                  <button
-                    key={cat.key}
-                    onClick={() => {
-                      setSelectedCategory(cat.key);
-                      setSelectedMenu('all');
-                      setSelectedPantiesType(0);
-                      if (selectedCategory as any === 'favorites') {
-                        setSelectedCategory(cat.key);
-                      }
-                    }}
-                    className={`p-2.5 rounded-lg text-xs font-semibold text-left flex items-center justify-between transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-pink-50 text-[#e02484] shadow-sm font-bold'
-                        : 'bg-transparent hover:bg-gray-50 text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      {renderCategoryIcon(cat.key, `w-4 h-4 ${isSelected ? 'text-[#e02484]' : 'text-gray-400'}`)}
-                      <span>{lang === 'ru' ? cat.labelRu : cat.labelUa}</span>
-                    </div>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
-                      isSelected ? 'bg-pink-100 text-[#e02484]' : 'bg-gray-100 text-gray-400 border border-gray-200'
-                    }`}>
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
+                    const isSelected = selectedCategory === cat.key;
+                    const count = allProducts.filter(p => isProductInCategory(p, cat.key)).length;
+                    
+                    return (
+                      <button
+                        key={cat.key}
+                        onClick={() => {
+                          setSelectedCategory(cat.key);
+                          const matchingMenu = Object.keys(MENU_TRANSLATIONS).find(m => getCategoryKeyFromMenu(m) === cat.key);
+                          setSelectedMenu(matchingMenu || 'all');
+                          setSelectedPantiesType(0);
+                          setSelectedBraType(0);
+                          setSelectedPajamaType(0);
+                          setSelectedSwimwearType(0);
+                          setSelectedSetType(0);
+                          setSelectedThermalType(0);
+                          setSelectedEroticType(0);
+                          setSelectedToysType(0);
+                        }}
+                        className={`p-2.5 rounded-lg text-xs font-semibold text-left flex items-center justify-between transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-pink-50 text-[#e02484] shadow-sm font-bold'
+                            : 'bg-transparent hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          {renderCategoryIcon(cat.key, `w-4 h-4 ${isSelected ? 'text-[#e02484]' : 'text-gray-400'}`)}
+                          <span>{lang === 'ru' ? cat.labelRu : cat.labelUa}</span>
+                        </div>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                          isSelected ? 'bg-pink-100 text-[#e02484]' : 'bg-gray-100 text-gray-400 border border-gray-200'
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -1887,21 +1877,21 @@ export default function App() {
             )}
 
             {/* Colors picker selection */}
-            {allUniqueColors.length > 0 && (
-              <div className="space-y-2 pt-2 border-t border-gray-100">
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5">{t.colorsLabel}</label>
-                <select
-                  value={selectedColor}
-                  onChange={e => setSelectedColor(e.target.value)}
-                  className="w-full p-2 bg-white border border-gray-300 text-gray-800 focus:border-[#e02484] rounded-lg text-xs focus:outline-none transition-all font-sans"
-                >
-                  <option value="all">{lang === 'ru' ? 'Все цвета' : 'Всі кольори'}</option>
-                  {allUniqueColors.map(col => (
-                    <option key={col} value={col}>{col}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+            <div className="space-y-2 pt-2 border-t border-gray-100">
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5">{t.colorsLabel}</label>
+              <select
+                value={selectedColor}
+                onChange={e => setSelectedColor(e.target.value)}
+                className="w-full p-2 bg-white border border-gray-300 text-gray-800 focus:border-[#e02484] rounded-lg text-xs focus:outline-none transition-all font-sans"
+              >
+                <option value="all">{lang === 'ru' ? 'Все цвета' : 'Всі кольори'}</option>
+                {OFFICIAL_COLORS.map(c => (
+                  <option key={c.ua} value={c.ua}>
+                    {lang === 'ru' ? c.ru : c.ua}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Sorting controls */}
             <div className="space-y-2 pt-2 border-t border-gray-100">

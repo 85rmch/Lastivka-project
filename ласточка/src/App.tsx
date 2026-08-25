@@ -913,8 +913,7 @@ export default function App() {
       sortOptions: {
         default: 'По умолчанию',
         priceAsc: 'Сначала дешевые',
-        priceDesc: 'Сначала дорогие',
-        stock: 'По наличию'
+        priceDesc: 'Сначала дорогие'
       },
       clearFilters: 'Сбросить фильтры',
       productsCount: 'Найдено {count} товаров',
@@ -952,8 +951,7 @@ export default function App() {
       sortOptions: {
         default: 'За замовчуванням',
         priceAsc: 'Спочатку дешевші',
-        priceDesc: 'Спочатку дорожчі',
-        stock: 'За наявністю'
+        priceDesc: 'Спочатку дорожчі'
       },
       clearFilters: 'Скинути фільтри',
       productsCount: 'Знайдено {count} товарів',
@@ -1007,7 +1005,7 @@ export default function App() {
       setSearchQuery('');
     } else if (menuItem === 'НОВИНКИ') {
       setSelectedCategory('new');
-      setSortBy('stock');
+      setSortBy('default');
       setSearchQuery('');
     } else {
       setSelectedCategory('all');
@@ -1905,7 +1903,6 @@ export default function App() {
                   <option value="default">{t.sortOptions.default}</option>
                   <option value="priceAsc">{t.sortOptions.priceAsc}</option>
                   <option value="priceDesc">{t.sortOptions.priceDesc}</option>
-                  <option value="stock">{t.sortOptions.stock}</option>
                 </select>
                 <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-3 pointer-events-none" />
               </div>

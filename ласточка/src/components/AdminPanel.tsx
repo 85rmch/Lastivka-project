@@ -31,7 +31,7 @@ import {
   getDemoProducts,
   getAuthClient
 } from '../lib/supabase';
-import { CATEGORIES, compressImageFile } from '../data';
+import { CATEGORIES, COLOR_OPTIONS, compressImageFile } from '../data';
 import { getDefaultBlogPosts } from '../defaultBlogPosts';
 import { parseCSVProducts } from '../lib/csvHelper';
 import { BlogPost } from '../types';
@@ -588,8 +588,16 @@ create policy "Allow public update access on orders" on orders for update using 
                     <option key={cat.key} value={cat.key}>{lang === 'ru' ? cat.labelRu : cat.labelUa}</option>
                   ))}
                 </select>
-                <input type="text" placeholder={t.colorPlaceholder} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
-                  value={newProduct.color} onChange={e => setNewProduct({...newProduct, color: e.target.value})} />
+                <select 
+                  className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer" 
+                  value={newProduct.color} 
+                  onChange={e => setNewProduct({...newProduct, color: e.target.value})}
+                >
+                  <option value="">{lang === 'ru' ? 'Выберите цвет...' : 'Оберіть колір...'}</option>
+                  {COLOR_OPTIONS.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
               <textarea placeholder={t.descPlaceholder} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
                 value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} />

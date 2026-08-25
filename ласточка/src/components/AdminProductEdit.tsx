@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Product } from '../types';
 import { updateProduct, deleteProduct } from '../lib/supabase';
 import { Loader2, X, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { CATEGORIES, cleanImageUrl, compressImageFile } from '../data';
+import { CATEGORIES, COLOR_OPTIONS, cleanImageUrl, compressImageFile } from '../data';
 
 export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'ua' }: { product: Product; onClose: () => void; onUpdate: () => void; lang?: 'ru' | 'ua' }) {
   const [formData, setFormData] = useState<Product>({ ...product, photo: Array.isArray(product.photo) ? product.photo : [] });
@@ -128,13 +128,25 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
           </div>
         </div>
 
-        <select className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
-          value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-          <option value="" disabled>{t.selectCategory}</option>
-          {CATEGORIES.filter(c => c.key !== 'all').map(cat => (
-            <option key={cat.key} value={cat.key}>{lang === 'ru' ? cat.labelRu : cat.labelUa}</option>
-          ))}
-        </select>
+        <div className="grid grid-cols-2 gap-3">
+          <select className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer" 
+            value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+            <option value="" disabled>{t.selectCategory}</option>
+            {CATEGORIES.filter(c => c.key !== 'all').map(cat => (
+              <option key={cat.key} value={cat.key}>{lang === 'ru' ? cat.labelRu : cat.labelUa}</option>
+            ))}
+          </select>
+          <select className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer" 
+            value={formData.color || ''} onChange={e => setFormData({...formData, color: e.target.value})}>
+            <option value="">{lang === 'ru' ? 'Выберите цвет...' : 'Оберіть колір...'}</option>
+            {COLOR_OPTIONS.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+            {formData.color && !COLOR_OPTIONS.includes(formData.color) && (
+              <option value={formData.color}>{formData.color}</option>
+            )}
+          </select>
+        </div>
         <textarea placeholder={t.descLabel} value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />
         <div className="grid grid-cols-2 gap-3">
           <input type="number" placeholder={t.priceLabel} value={formData.price || ''} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full p-2 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />

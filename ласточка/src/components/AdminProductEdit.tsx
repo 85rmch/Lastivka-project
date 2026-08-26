@@ -19,10 +19,14 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
       nameLabel: 'Название',
       productCodeLabel: 'Код товара',
       vendorCodeLabel: 'Артикул',
+      categoryLabel: 'Категория',
       selectCategory: 'Выберите категорию...',
+      colorLabel: 'Цвет',
+      sizesLabel: 'Размеры (через запятую)',
+      cupTypeLabel: 'Тип чашки',
       descLabel: 'Описание',
       priceLabel: 'Цена',
-      stockLabel: 'Остаток',
+      stockLabel: 'Остаток (шт.)',
       addPhoto: 'Добавить фото (до 8 шт.)',
       maxPhotoAlert: 'Максимальное количество фото - 8.',
       uploadError: 'Ошибка при загрузке фото: ',
@@ -44,10 +48,14 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
       nameLabel: 'Назва',
       productCodeLabel: 'Код товару',
       vendorCodeLabel: 'Артикул',
+      categoryLabel: 'Категорія',
       selectCategory: 'Оберіть категорію...',
+      colorLabel: 'Колір',
+      sizesLabel: 'Розміри (через кому)',
+      cupTypeLabel: 'Тип чашки',
       descLabel: 'Опис',
       priceLabel: 'Ціна',
-      stockLabel: 'Залишок',
+      stockLabel: 'Залишок (шт.)',
       addPhoto: 'Додати фото (до 8 шт.)',
       maxPhotoAlert: 'Максимальна кількість фото - 8.',
       uploadError: 'Помилка при завантаженні фото: ',
@@ -107,7 +115,10 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
         
         {/* Scrollable Body */}
         <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
-          <input type="text" placeholder={t.nameLabel} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />
+          <div>
+            <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.nameLabel}</label>
+            <input type="text" placeholder={t.nameLabel} value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />
+          </div>
           
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -133,28 +144,68 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <select className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer" 
-              value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
-              <option value="" disabled>{t.selectCategory}</option>
-              {CATEGORIES.filter(c => c.key !== 'all').map(cat => (
-                <option key={cat.key} value={cat.key}>{lang === 'ru' ? cat.labelRu : cat.labelUa}</option>
-              ))}
-            </select>
-            <select className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer" 
-              value={formData.color || ''} onChange={e => setFormData({...formData, color: e.target.value})}>
-              <option value="">{lang === 'ru' ? 'Выберите цвет...' : 'Оберіть колір...'}</option>
-              {COLOR_OPTIONS.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-              {formData.color && !COLOR_OPTIONS.includes(formData.color) && (
-                <option value={formData.color}>{formData.color}</option>
-              )}
-            </select>
+            <div>
+              <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.categoryLabel}</label>
+              <select className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer" 
+                value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                <option value="" disabled>{t.selectCategory}</option>
+                {CATEGORIES.filter(c => c.key !== 'all').map(cat => (
+                  <option key={cat.key} value={cat.key}>{lang === 'ru' ? cat.labelRu : cat.labelUa}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.colorLabel}</label>
+              <select className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer" 
+                value={formData.color || ''} onChange={e => setFormData({...formData, color: e.target.value})}>
+                <option value="">{lang === 'ru' ? 'Выберите цвет...' : 'Оберіть колір...'}</option>
+                {COLOR_OPTIONS.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+                {formData.color && !COLOR_OPTIONS.includes(formData.color) && (
+                  <option value={formData.color}>{formData.color}</option>
+                )}
+              </select>
+            </div>
           </div>
-          <textarea placeholder={t.descLabel} value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs min-h-[60px]" />
+
           <div className="grid grid-cols-2 gap-3">
-            <input type="number" placeholder={t.priceLabel} value={formData.price || ''} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />
-            <input type="number" placeholder={t.stockLabel} value={formData.stock || ''} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />
+            <div>
+              <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.sizesLabel}</label>
+              <input 
+                type="text" 
+                placeholder={t.sizesLabel} 
+                value={formData.sizes || ''} 
+                onChange={e => setFormData({...formData, sizes: e.target.value})} 
+                className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
+              />
+            </div>
+            <div>
+              <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.cupTypeLabel}</label>
+              <input 
+                type="text" 
+                placeholder={t.cupTypeLabel} 
+                value={formData.cup_type || ''} 
+                onChange={e => setFormData({...formData, cup_type: e.target.value})} 
+                className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.descLabel}</label>
+            <textarea placeholder={t.descLabel} value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs min-h-[60px]" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.priceLabel}</label>
+              <input type="number" placeholder={t.priceLabel} value={formData.price || ''} onChange={e => setFormData({...formData, price: Number(e.target.value)})} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />
+            </div>
+            <div>
+              <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.stockLabel}</label>
+              <input type="number" placeholder={t.stockLabel} value={formData.stock || ''} onChange={e => setFormData({...formData, stock: Number(e.target.value)})} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" />
+            </div>
           </div>
           
           <div className="flex flex-col gap-2">

@@ -31,7 +31,7 @@ import {
   getDemoProducts,
   getAuthClient
 } from '../lib/supabase';
-import { CATEGORIES, COLOR_OPTIONS, compressImageFile } from '../data';
+import { CATEGORIES, COLOR_OPTIONS, CUP_TYPE_OPTIONS, compressImageFile } from '../data';
 import MultiColorSelect from './MultiColorSelect';
 import { getDefaultBlogPosts } from '../defaultBlogPosts';
 import { parseCSVProducts } from '../lib/csvHelper';
@@ -606,8 +606,19 @@ create policy "Allow public update access on orders" on orders for update using 
               <div className="grid grid-cols-2 gap-3">
                 <input type="number" placeholder={t.stockPlaceholder} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
                     value={newProduct.stock || ''} onChange={e => setNewProduct({...newProduct, stock: Number(e.target.value)})} />
-                <input type="text" placeholder={t.cupTypePlaceholder} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
-                  value={newProduct.cup_type} onChange={e => setNewProduct({...newProduct, cup_type: e.target.value})} />
+                <select 
+                  className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer"
+                  value={newProduct.cup_type} 
+                  onChange={e => setNewProduct({...newProduct, cup_type: e.target.value})}
+                >
+                  <option value="">{lang === 'ru' ? 'Тип чашки (выберите...)' : 'Тип чашки (оберіть...)'}</option>
+                  {CUP_TYPE_OPTIONS.map(ct => (
+                    <option key={ct} value={ct}>{ct}</option>
+                  ))}
+                  {newProduct.cup_type && !CUP_TYPE_OPTIONS.includes(newProduct.cup_type) && (
+                    <option value={newProduct.cup_type}>{newProduct.cup_type}</option>
+                  )}
+                </select>
               </div>
               <input type="text" placeholder={t.sizesPlaceholder} className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
                 value={newProduct.sizes} onChange={e => setNewProduct({...newProduct, sizes: e.target.value})} />

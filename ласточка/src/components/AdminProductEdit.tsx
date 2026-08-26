@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Product } from '../types';
 import { updateProduct, deleteProduct } from '../lib/supabase';
 import { Loader2, X, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { CATEGORIES, COLOR_OPTIONS, cleanImageUrl, compressImageFile } from '../data';
+import { CATEGORIES, COLOR_OPTIONS, CUP_TYPE_OPTIONS, cleanImageUrl, compressImageFile } from '../data';
 import MultiColorSelect from './MultiColorSelect';
 
 export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'ua' }: { product: Product; onClose: () => void; onUpdate: () => void; lang?: 'ru' | 'ua' }) {
@@ -178,13 +178,19 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
             </div>
             <div>
               <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.cupTypeLabel}</label>
-              <input 
-                type="text" 
-                placeholder={t.cupTypeLabel} 
+              <select 
                 value={formData.cup_type || ''} 
                 onChange={e => setFormData({...formData, cup_type: e.target.value})} 
-                className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs" 
-              />
+                className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer"
+              >
+                <option value="">{lang === 'ru' ? 'Выберите тип чашки...' : 'Оберіть тип чашки...'}</option>
+                {CUP_TYPE_OPTIONS.map(ct => (
+                  <option key={ct} value={ct}>{ct}</option>
+                ))}
+                {formData.cup_type && !CUP_TYPE_OPTIONS.includes(formData.cup_type) && (
+                  <option value={formData.cup_type}>{formData.cup_type}</option>
+                )}
+              </select>
             </div>
           </div>
 

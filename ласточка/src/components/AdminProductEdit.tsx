@@ -3,6 +3,7 @@ import { Product } from '../types';
 import { updateProduct, deleteProduct } from '../lib/supabase';
 import { Loader2, X, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { CATEGORIES, COLOR_OPTIONS, cleanImageUrl, compressImageFile } from '../data';
+import MultiColorSelect from './MultiColorSelect';
 
 export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'ua' }: { product: Product; onClose: () => void; onUpdate: () => void; lang?: 'ru' | 'ua' }) {
   const [formData, setFormData] = useState<Product>({ ...product, photo: Array.isArray(product.photo) ? product.photo : [] });
@@ -155,17 +156,12 @@ export default function AdminProductEdit({ product, onClose, onUpdate, lang = 'u
               </select>
             </div>
             <div>
-              <label className="block text-[#a19992] text-[10px] mb-1 font-semibold">{t.colorLabel}</label>
-              <select className="w-full p-2.5 bg-[#161616] border border-white/10 text-white rounded-lg text-xs cursor-pointer" 
-                value={formData.color || ''} onChange={e => setFormData({...formData, color: e.target.value})}>
-                <option value="">{lang === 'ru' ? 'Выберите цвет...' : 'Оберіть колір...'}</option>
-                {COLOR_OPTIONS.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-                {formData.color && !COLOR_OPTIONS.includes(formData.color) && (
-                  <option value={formData.color}>{formData.color}</option>
-                )}
-              </select>
+              <MultiColorSelect 
+                label={t.colorLabel}
+                value={formData.color || ''} 
+                onChange={newColor => setFormData({...formData, color: newColor})}
+                lang={lang}
+              />
             </div>
           </div>
 

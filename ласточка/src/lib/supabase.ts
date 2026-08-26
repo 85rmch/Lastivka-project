@@ -1,7 +1,8 @@
 import { getProductCategory, cleanImageUrl } from '../data';
 import { createClient } from '@supabase/supabase-js';
-import { Product, BlogPost } from '../types';
+import { Product, BlogPost, Banner } from '../types';
 import { PRODUCTS } from '../data';
+import { DEFAULT_BANNERS } from '../defaultBanners';
 
 // Helper to get demo products from localStorage if imported/edited, else fallback to standard PRODUCTS
 export function getDemoProducts(): Product[] {
@@ -713,5 +714,28 @@ export async function deleteSupabaseBlogPost(id: string): Promise<{ success: boo
     console.error('Delete blog post error:', err);
     return { success: false, error: err.message || 'Delete failed' };
   }
+}
+
+// Banners management helpers
+export async function fetchBanners(): Promise<Banner[]> {
+  const localStr = localStorage.getItem('lastochka_banners');
+  if (localStr) {
+    try {
+      const parsed = JSON.parse(localStr);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    } catch (e) {
+      console.error('Failed to parse lastochka_banners:', e);
+    }
+  }
+
+  // Fallback to DEFAULT_BANNERS and save them initially
+  localStorage.setItem('lastochka_banners', JSON.stringify(DEFAULT_BANNERS));
+  return DEFAULT_BANNERS;
+}
+
+export function saveAllBanners(banners: Banner[]): void {
+  localStorage.setItem('lastochka_banners', JSON.stringify(banners));
 }
 

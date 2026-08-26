@@ -39,6 +39,7 @@ import { BlogPost } from '../types';
 import AdminProductList from './AdminProductList';
 import AdminOrders from './AdminOrders';
 import BlogView from './BlogView';
+import AdminBanners from './AdminBanners';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -50,6 +51,7 @@ interface AdminPanelProps {
   blogPosts?: BlogPost[];
   onAddBlogPost?: (post: BlogPost) => void;
   onDeleteBlogPost?: (id: string) => void;
+  onBannersUpdated?: () => void;
 }
 
 export default function AdminPanel({ 
@@ -61,7 +63,8 @@ export default function AdminPanel({
   adminPassword,
   blogPosts = [],
   onAddBlogPost = () => {},
-  onDeleteBlogPost = () => {}
+  onDeleteBlogPost = () => {},
+  onBannersUpdated = () => {}
 }: AdminPanelProps) {
   if (!isOpen) return null;
   const [mode, setMode] = useState<'demo' | 'supabase'>('demo');
@@ -70,7 +73,7 @@ export default function AdminPanel({
   const [secretKey, setSecretKey] = useState('');
   const [tableName, setTableName] = useState('products');
   
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'add' | 'blog' | 'settings'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'add' | 'banners' | 'blog' | 'settings'>('products');
   const [selectedCategory, setSelectedCategory] = useState<string | 'all'>('all');
   
   const [testing, setTesting] = useState(false);
@@ -543,6 +546,10 @@ create policy "Allow public update access on orders" on orders for update using 
                 className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors ${activeTab === 'add' ? 'border-[#d4af37] text-[#d4af37]' : 'border-transparent text-[#6b645d] hover:text-white'}`}
             >{lang === 'ru' ? 'Добавить товар' : 'Додати товар'}</button>
             <button 
+                onClick={() => setActiveTab('banners')}
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors ${activeTab === 'banners' ? 'border-[#d4af37] text-[#d4af37]' : 'border-transparent text-[#6b645d] hover:text-white'}`}
+            >{lang === 'ru' ? 'Баннеры' : 'Банери'}</button>
+            <button 
                 onClick={() => setActiveTab('blog')}
                 className={`px-4 py-2 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors ${activeTab === 'blog' ? 'border-[#d4af37] text-[#d4af37]' : 'border-transparent text-[#6b645d] hover:text-white'}`}
             >{lang === 'ru' ? 'Блог' : 'Блог'}</button>
@@ -550,6 +557,10 @@ create policy "Allow public update access on orders" on orders for update using 
 
         {/* Content Body */}
         <div className={`overflow-y-auto flex-1 ${activeTab === 'orders' || activeTab === 'blog' ? 'p-0' : 'p-5 space-y-6'}`}>
+
+          {activeTab === 'banners' && (
+            <AdminBanners lang={lang} onBannersUpdated={onBannersUpdated} />
+          )}
 
           {activeTab === 'products' && (
               <div className="space-y-4">

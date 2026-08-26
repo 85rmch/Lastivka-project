@@ -88,3 +88,14 @@ export interface SupabaseConfig {
   tableName: string;
   mode: 'demo' | 'supabase';
 }
+
+export interface Banner {
+  id: string;
+  image: string;
+  titleRu: string;
+  titleUa: string;
+  subtitleRu: string;
+  subtitleUa: string;
+  accentText: string;
+  linkCategory?: string;
+}

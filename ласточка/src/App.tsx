@@ -31,48 +31,20 @@ import {
   Moon,
   Globe,
   Mail, Home, Clock, CornerUpRight, Share, Eye, EyeOff, Instagram, ArrowRight} from 'lucide-react';
-import { Product, CategoryKey, CartItem, Order, BlogPost } from './types';
+import { Product, CategoryKey, CartItem, Order, BlogPost, Banner } from './types';
 import { CATEGORIES, PRODUCTS, getCleanImage, cleanImageUrl, OFFICIAL_COLORS, matchProductColor, isProductInCategory } from './data';
-import { fetchSupabaseProducts, getStoredConfig, getDemoProducts, getAuthClient, fetchSupabaseBlogPosts, saveSupabaseBlogPost, deleteSupabaseBlogPost } from './lib/supabase';
+import { fetchSupabaseProducts, getStoredConfig, getDemoProducts, getAuthClient, fetchSupabaseBlogPosts, saveSupabaseBlogPost, deleteSupabaseBlogPost, fetchBanners } from './lib/supabase';
 import ProductCard from './components/ProductCard';
 import DetailModal from './components/DetailModal';
 import CartDrawer from './components/CartDrawer';
 import AdminPanel from './components/AdminPanel';
 import BlogView from './components/BlogView';
+import BannerCarousel from './components/BannerCarousel';
 import { motion, AnimatePresence } from 'motion/react';
 import { getDefaultBlogPosts } from './defaultBlogPosts';
 import { maybeTranslate } from './lib/translator';
 import { BRAND_LOGO_BASE64 } from './assets/logo_base64';
-import LingerieHeroImg from './assets/images/lingerie_hero_1786439566796.jpg';
-import PajamasHeroImg from './assets/images/pajamas_hero_1786439580625.jpg';
-import StockingsGroupHeroImg from './assets/images/stockings_group_hero_1786439594045.jpg';
 
-const HERO_SLIDES = [
-  {
-    image: LingerieHeroImg,
-    titleRu: "Новая Коллекция Белья",
-    titleUa: "Нова Колекція Білизни",
-    subtitleRu: "Изысканное кружево и премиальное качество комплектов WeiyeSi",
-    subtitleUa: "Вишукане мереживо та преміальна якість комплектів WeiyeSi",
-    accentText: "WeiyeSi Premium"
-  },
-  {
-    image: PajamasHeroImg,
-    titleRu: "Пижамы и Одежда для Дома",
-    titleUa: "Піжами та Одяг для Дому",
-    subtitleRu: "Уютные, мягкие махровые комплекты и нежный шелк",
-    subtitleUa: "Затишні, м'які махрові комплекти та ніжний шовк",
-    accentText: "Lastochka Home"
-  },
-  {
-    image: StockingsGroupHeroImg,
-    titleRu: "Колготки, Чулки и Носочки",
-    titleUa: "Колготки, Панчохи та Шкарпетки",
-    subtitleRu: "Широкий выбор итальянских брендов и фантазийных узоров",
-    subtitleUa: "Широкий вибір італійських брендів та фантазійних візерунків",
-    accentText: "Gatta & Gabriella"
-  }
-];
 
 const BRA_SUBTYPES = [
   { id: 0, ru: "Все типы", ua: "Всі типи", match: [] },
@@ -223,16 +195,28 @@ export default function App() {
   }, [theme]);
 
   const [managerMode, setManagerMode] = useState<boolean>(false); // Secret shopowner mode to display margins!
-  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [banners, setBanners] = useState<Banner[]>([]);
 
-  // Autoplay for hero banners with reset on manual action
+  const loadBanners = async () => {
+    const list = await fetchBanners();
+    setBanners(list);
+  };
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % HERO_SLIDES.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [currentSlide]);
+    loadBanners();
+  }, []);
+
   
+  const handleCategorySelect = (categoryKey: string) => {
+    if (categoryKey && categoryKey !== 'all') {
+      setSelectedCategory(categoryKey as CategoryKey);
+      setActiveView('catalog');
+    } else {
+      setSelectedCategory('all');
+      setActiveView('catalog');
+    }
+  };
+
   // Products Lists
   const [allProducts, setAllProducts] = useState<Product[]>(getStoredConfig().mode === 'supabase' ? [] : getDemoProducts());
   const [loading, setLoading] = useState<boolean>(true);
@@ -1659,78 +1643,9 @@ export default function App() {
 
       {activeView === 'catalog' ? (
         <>
-          {/* 4. Elegant Hero Slider Carousel */}
-      <div className="w-full bg-white border-b border-gray-200 overflow-hidden relative h-[350px] sm:h-[400px] md:h-[440px]">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-            className="w-full h-full relative"
-          >
-            <img
-              src={HERO_SLIDES[currentSlide].image}
-              alt={HERO_SLIDES[currentSlide].titleRu}
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover object-top brightness-[0.75]"
-            />
-            
-            {/* Elegant dark gradient overlay to ensure perfect text readability on all screen sizes */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent pointer-events-none" />
-            
-            {/* Absolute overlay content */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start p-8 md:p-16 max-w-7xl mx-auto w-full text-white pointer-events-none select-none">
-              <span className="px-3 py-1 bg-[#e02484] text-[10px] font-extrabold uppercase tracking-widest rounded-md mb-3 shadow-md">
-                {HERO_SLIDES[currentSlide].accentText}
-              </span>
-              <h2 className="text-2xl md:text-4xl lg:text-5xl font-sans font-extrabold tracking-tight mb-2 drop-shadow-md">
-                {lang === 'ru' ? HERO_SLIDES[currentSlide].titleRu : HERO_SLIDES[currentSlide].titleUa}
-              </h2>
-              <p className="text-xs md:text-sm text-gray-200 max-w-md font-sans drop-shadow-sm leading-relaxed mb-6">
-                {lang === 'ru' ? HERO_SLIDES[currentSlide].subtitleRu : HERO_SLIDES[currentSlide].subtitleUa}
-              </p>
-              <button 
-                onClick={() => handleNavClick('КОМПЛЕКТЫ')}
-                className="pointer-events-auto px-5 py-2.5 bg-white hover:bg-[#e02484] text-gray-900 hover:text-white font-extrabold text-xs tracking-wider rounded shadow-lg transition-all active:scale-95 cursor-pointer uppercase"
-              >
-                {lang === 'ru' ? 'Смотреть каталог' : 'Дивитись каталог'}
-              </button>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Carousel arrows */}
-        <button
-          onClick={() => setCurrentSlide(prev => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)}
-          className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-[#e02484] text-white rounded-full transition-all cursor-pointer z-10"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => setCurrentSlide(prev => (prev + 1) % HERO_SLIDES.length)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-[#e02484] text-white rounded-full transition-all cursor-pointer z-10"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-
-        {/* Carousel indicators dots */}
-        <div className="absolute bottom-4 inset-x-0 flex justify-center gap-1.5 z-10">
-          {HERO_SLIDES.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                idx === currentSlide ? 'bg-[#e02484] w-5' : 'bg-white/40 hover:bg-white/80'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* 5. Main Catalog Layout Area */}
       <main id="catalog-section" className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
+
         
         {/* Left column sidebar for searching, filter specs, pricing bounds */}
         <div className="lg:col-span-1 space-y-6">
@@ -2135,6 +2050,7 @@ export default function App() {
         blogPosts={blogPosts}
         onAddBlogPost={handleAddPost}
         onDeleteBlogPost={handleDeletePost}
+        onBannersUpdated={loadBanners}
       />
 
       {/* Full-width Product Detail information modal overlay */}
@@ -2168,8 +2084,16 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* Bottom Banner Carousel near Footer */}
+      <BannerCarousel 
+        banners={banners} 
+        lang={lang} 
+        onCategorySelect={handleCategorySelect} 
+      />
+
       {/* Footer credits and information */}
       <footer className="mt-12 bg-[#ffd5ea] text-gray-900 py-8 md:py-10 px-4 font-sans">
+
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
           
           <div className="flex flex-col items-center md:items-start text-center md:text-left flex-shrink-0">

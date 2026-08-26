@@ -184,7 +184,6 @@ export default function ProductCard({
 
         {/* Small parameter specifications text from product info */}
         <p className="text-[10px] sm:text-[11px] text-gray-500 line-clamp-2 mb-2 sm:mb-3 leading-tight sm:leading-relaxed">
-          {product.color ? `${lang === 'ru' ? 'Цвет' : 'Колір'}: ${maybeTranslate(product.color, lang)}. ` : ''}
           {product.sizes ? `${lang === 'ru' ? 'Размеры' : 'Розміри'}: ${product.sizes}. ` : ''}
           {product.name.includes('Код') ? maybeTranslate(product.name.split('.').slice(1).join('.'), lang) : ''}
         </p>

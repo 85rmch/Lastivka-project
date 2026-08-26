@@ -335,28 +335,6 @@ export default function DetailModal({
               </div>
             )}
 
-            {/* Colors picker */}
-            {colorsList.length > 0 && colorsList[0] !== '' && (
-              <div className="mb-6">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">{t.colorsLabel}</label>
-                <div className="flex flex-wrap gap-2">
-                  {colorsList.map((col) => (
-                    <button
-                      key={col}
-                      onClick={() => setSelectedColor(col)}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all border cursor-pointer ${
-                        selectedColor === col
-                          ? 'bg-pink-50 border-[#e02484] text-[#e02484] font-bold'
-                          : 'bg-white border-gray-200 text-gray-600 hover:border-[#e02484]'
-                      }`}
-                    >
-                      {maybeTranslate(col, lang)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Quantity Controls & Add to Cart Action */}
             <div className="flex items-center gap-4 mb-8 pt-4 border-t border-gray-200 mt-auto">
               <div className="flex flex-col gap-1">

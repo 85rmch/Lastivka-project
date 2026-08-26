@@ -30,7 +30,7 @@ import {
   Sun,
   Moon,
   Globe,
-  Mail, Home, Clock, CornerUpRight, Share, Eye, EyeOff, Instagram, ArrowRight} from 'lucide-react';
+  Mail, Home, Clock, CornerUpRight, Share, Eye, EyeOff, Instagram, ArrowRight, Send} from 'lucide-react';
 import { Product, CategoryKey, CartItem, Order, BlogPost, Banner } from './types';
 import { CATEGORIES, PRODUCTS, getCleanImage, cleanImageUrl, OFFICIAL_COLORS, matchProductColor, isProductInCategory } from './data';
 import { fetchSupabaseProducts, getStoredConfig, getDemoProducts, getAuthClient, fetchSupabaseBlogPosts, saveSupabaseBlogPost, deleteSupabaseBlogPost, fetchBanners } from './lib/supabase';
@@ -2171,8 +2171,7 @@ export default function App() {
             <div className="flex items-start space-x-2.5">
               <Home className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <div className="flex flex-col space-y-0.5">
-                <span>Онлайн-магазин модної нижньої білизни – склад в місті Кривий Ріг.</span>
-                <span>Ательє з ремонту та пошиття одягу – Кривий Ріг, вул. Котляревського, б.5 (за "АТБ")</span>
+                <span>{lang === 'ru' ? 'Онлайн-магазин модного женского белья – склад в г. Кривой Рог.' : 'Онлайн-магазин модної нижньої білизни – склад в місті Кривий Ріг.'}</span>
               </div>
             </div>
 
@@ -2181,11 +2180,16 @@ export default function App() {
             <div className="flex flex-col space-y-2">
               <div className="flex items-center space-x-2.5">
                 <Clock className="w-4 h-4 flex-shrink-0" />
-                <span>10:30 - 19:30</span>
+                <span className="font-semibold">24/7</span>
               </div>
-              <a href="#" className="flex items-center space-x-2.5 hover:text-pink-600 transition-colors w-fit">
-                <CornerUpRight className="w-4 h-4 flex-shrink-0" />
-                <span>Связаться с нами</span>
+              <a 
+                href="https://t.me/+380960486714" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center space-x-2.5 hover:text-pink-600 transition-colors w-fit font-medium text-pink-700"
+              >
+                <Send className="w-4 h-4 flex-shrink-0 text-sky-500" />
+                <span>{lang === 'ru' ? 'Написать в Telegram' : 'Написати в Telegram'}</span>
               </a>
             </div>
 

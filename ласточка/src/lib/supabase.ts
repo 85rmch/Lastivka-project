@@ -716,9 +716,39 @@ export async function deleteSupabaseBlogPost(id: string): Promise<{ success: boo
   }
 }
 
-// Banners management helpers
+// Banners management helpers (Supabase + localStorage fallback)
 export async function fetchBanners(): Promise<Banner[]> {
   const localStr = localStorage.getItem('lastochka_banners');
+  const client = getAuthClient() || getSupabaseClient();
+
+  // Try fetching from Supabase 'banners' table if client available
+  if (client) {
+    try {
+      const { data, error } = await client
+        .from('banners')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (!error && data && data.length > 0) {
+        const mapped: Banner[] = data.map((b: any) => ({
+          id: b.id,
+          image: b.image,
+          titleRu: b.title_ru || b.title_ua || '',
+          titleUa: b.title_ua || b.title_ru || '',
+          subtitleRu: b.subtitle_ru || '',
+          subtitleUa: b.subtitle_ua || '',
+          accentText: b.accent_text || '',
+          linkCategory: b.link_category || 'all'
+        }));
+        localStorage.setItem('lastochka_banners', JSON.stringify(mapped));
+        return mapped;
+      }
+    } catch (e) {
+      console.warn('Could not fetch banners from Supabase table "banners", falling back to localStorage:', e);
+    }
+  }
+
+  // Fallback to localStorage
   if (localStr) {
     try {
       const parsed = JSON.parse(localStr);
@@ -735,7 +765,46 @@ export async function fetchBanners(): Promise<Banner[]> {
   return DEFAULT_BANNERS;
 }
 
-export function saveAllBanners(banners: Banner[]): void {
+export async function saveAllBanners(banners: Banner[]): Promise<void> {
+  // Always update localStorage first for fast UI response
   localStorage.setItem('lastochka_banners', JSON.stringify(banners));
+
+  const client = getAuthClient() || getSupabaseClient();
+  if (client) {
+    try {
+      const currentIds = banners.map(b => b.id);
+
+      // Upsert rows to Supabase
+      const rows = banners.map(b => ({
+        id: b.id,
+        image: b.image,
+        title_ru: b.titleRu,
+        title_ua: b.titleUa,
+        subtitle_ru: b.subtitleRu,
+        subtitle_ua: b.subtitleUa,
+        accent_text: b.accentText,
+        link_category: b.linkCategory || 'all'
+      }));
+
+      const { error: upsertErr } = await client.from('banners').upsert(rows);
+      if (upsertErr) {
+        console.warn('Failed to upsert banners to Supabase table "banners":', upsertErr.message);
+      }
+
+      // Delete removed banners from Supabase table if any were deleted
+      const { data: existingData } = await client.from('banners').select('id');
+      if (existingData && existingData.length > 0) {
+        const idsToDelete = existingData
+          .map((row: any) => row.id)
+          .filter((id: string) => !currentIds.includes(id));
+
+        if (idsToDelete.length > 0) {
+          await client.from('banners').delete().in('id', idsToDelete);
+        }
+      }
+    } catch (e) {
+      console.warn('Error syncing banners to Supabase table "banners":', e);
+    }
+  }
 }
 

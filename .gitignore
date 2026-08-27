@@ -1,0 +1,21 @@
+lastochkashop-*.json
+.env
+supabase_config.json
+node_modules/
+
+# Ignore test and utility scripts
+match_products.mjs
+match_tree.cjs
+test_fast.mjs
+test_images.mjs
+test_richy.mjs
+test-null.js
+fix-*.cjs
+fix*.cjs
+generate_logo.cjs
+make_transparent.cjs
+list_repo.cjs
+list_repo.js
+tree_repo.cjs
+update_menu.cjs
+move_lang.cjs

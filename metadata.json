@@ -1,0 +1,6 @@
+{
+  "name": "Lastochka Premium Store",
+  "description": "Premium e-commerce boutique storefront with custom cards, shopping cart, filter criteria, and seamless Supabase integration with automatic seeding.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

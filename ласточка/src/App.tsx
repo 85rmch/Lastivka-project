@@ -1460,7 +1460,7 @@ export default function App() {
       {/* 3. Hot Pink Brand Menu Bar */}
       <div 
         onMouseLeave={() => setHoveredMenu(null)}
-        className="relative z-40"
+        className="relative z-40 hidden md:block"
       >
         <nav className="bg-[#e02484] shadow-md select-none w-full border-b border-[#c0146f] relative z-20">
           <div className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide flex items-center justify-between gap-1 py-1">

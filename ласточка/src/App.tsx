@@ -1178,30 +1178,16 @@ export default function App() {
               </>
             )}
           </button>
-
-          {/* Full Web Version Button */}
-          <a
-            href={window.location.origin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-black bg-gradient-to-r from-pink-500 via-[#e02484] to-pink-600 text-white rounded shadow-[0_2px_8px_rgba(224,36,132,0.3)] hover:shadow-[0_4px_12px_rgba(224,36,132,0.45)] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer select-none uppercase tracking-wider"
-            title={lang === 'ru' ? 'Открыть полноценную веб-версию в браузере' : 'Відкрити повноцінну веб-версію в браузері'}
-          >
-            <Globe className="w-3 h-3 shrink-0 animate-pulse text-white" />
-            <span>{lang === 'ru' ? 'Веб-версия' : 'Веб-версія'}</span>
-          </a>
         </div>
         <div className="flex items-center gap-4">
           <span 
             className="hover:text-[#e02484] cursor-pointer transition-colors font-medium flex items-center gap-1"
             onClick={() => { resetFilters(); setSelectedCategory('favorites' as any); }}
           >
-            <Heart className="w-3 h-3 text-[#e02484] fill-[#e02484]" />
-            {lang === 'ru' ? `Закладки (${favorites.length})` : `Закладки (${favorites.length})`}
+            <Heart className="w-3.5 h-3.5 text-[#e02484] fill-[#e02484]" />
+            {lang === 'ru' ? `Избранное (${favorites.length})` : `Вподобання (${favorites.length})`}
           </span>
-          <span className="hover:text-[#e02484] cursor-pointer transition-colors font-medium" onClick={() => setIsCartOpen(true)}>
-            {lang === 'ru' ? 'Корзина покупок' : 'Кошик покупок'}
-          </span>
+
           
         </div>
       </div>
@@ -2121,8 +2107,8 @@ export default function App() {
               </p>
             </div>
 
-            {/* Social Icons */}
-            <div className="flex items-center gap-3 mt-3">
+            {/* Social Icons & Web Version */}
+            <div className="flex items-center gap-3 mt-3 flex-wrap justify-center md:justify-start">
               <a 
                 href="https://www.instagram.com/lastochka.dp.ua?utm_source=qr&igsh=eGM2b2RqZjNhMzB5" 
                 target="_blank" 
@@ -2142,6 +2128,17 @@ export default function App() {
                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
                   <path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/>
                 </svg>
+              </a>
+
+              <a
+                href={window.location.origin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold bg-white hover:bg-pink-50 text-[#e02484] rounded-full border border-pink-200 shadow-sm hover:shadow hover:scale-105 active:scale-95 transition-all cursor-pointer select-none tracking-wide"
+                title={lang === 'ru' ? 'Открыть полноценную веб-версию в браузере' : 'Відкрити повноцінну веб-версію в браузері'}
+              >
+                <Globe className="w-3.5 h-3.5 shrink-0 animate-pulse text-[#e02484]" />
+                <span>{lang === 'ru' ? 'Веб-версия' : 'Веб-версія'}</span>
               </a>
             </div>
 

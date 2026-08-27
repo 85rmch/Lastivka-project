@@ -164,6 +164,7 @@ const MENU_TRANSLATIONS: Record<string, { ru: string; ua: string }> = {
   'ТЕРМОБІЛИЗНА': { ru: 'ТЕРМОБЕЛЬЕ', ua: 'ТЕРМОБІЛИЗНА' },
   'ЕРОТИЧНА БІЛИЗНА': { ru: 'ЭРОТИЧЕСКОЕ БЕЛЬЕ', ua: 'ЕРОТИЧНА БІЛИЗНА' },
   'ІГРАШКИ ТА АКСЕСУАРИ': { ru: 'ИГРУШКИ И АКСЕССУАРЫ', ua: 'ІГРАШКИ ТА АКСЕСУАРИ' },
+  'ШКАРПЕТКИ': { ru: 'НОСКИ', ua: 'ШКАРПЕТКИ' },
   'НОВИНКИ': { ru: 'НОВИНКИ', ua: 'НОВИНКИ' },
   'БЛОГ': { ru: 'БЛОГ', ua: 'БЛОГ' },
 };
@@ -590,6 +591,9 @@ export default function App() {
         return 'erotic';
       case 'ІГРАШКИ ТА АКСЕСУАРИ':
         return 'toys_accessories';
+      case 'ШКАРПЕТКИ':
+      case 'НОСКИ':
+        return 'socks';
       case 'НОВИНКИ':
         return 'new';
       default:
@@ -1371,7 +1375,7 @@ export default function App() {
       >
         <nav className="bg-[#e02484] shadow-md select-none w-full border-b border-[#c0146f] relative z-20">
           <div className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide flex items-center justify-between gap-1 py-1">
-            {['БЮСТГАЛЬТЕРИ', 'ТРУСИКИ', 'ОДЯГ ДЛЯ ДОМУ', 'КУПАЛЬНИКИ', 'КОМПЛЕКТИ БІЛИЗНИ', 'ТЕРМОБІЛИЗНА', 'ЕРОТИЧНА БІЛИЗНА', 'ІГРАШКИ ТА АКСЕСУАРИ', 'НОВИНКИ', 'БЛОГ'].map(menu => {
+            {['БЮСТГАЛЬТЕРИ', 'ТРУСИКИ', 'ОДЯГ ДЛЯ ДОМУ', 'КУПАЛЬНИКИ', 'КОМПЛЕКТИ БІЛИЗНИ', 'ТЕРМОБІЛИЗНА', 'ЕРОТИЧНА БІЛИЗНА', 'ІГРАШКИ ТА АКСЕСУАРИ', 'ШКАРПЕТКИ', 'НОВИНКИ', 'БЛОГ'].map(menu => {
               const isActive = selectedMenu === menu;
               return (
                 <button

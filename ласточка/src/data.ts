@@ -11,6 +11,7 @@ export const CATEGORIES: CategoryInfo[] = [
   { key: 'thermals', labelRu: 'Термобелье', labelUa: 'ТЕРМОБІЛИЗНА', icon: 'Flame' },
   { key: 'erotic', labelRu: 'Эротическое белье', labelUa: 'ЕРОТИЧНА БІЛИЗНА', icon: 'Zap' },
   { key: 'toys_accessories', labelRu: 'Игрушки и аксессуары', labelUa: 'ІГРАШКИ ТА АКСЕСУАРИ', icon: 'Gamepad2' },
+  { key: 'socks', labelRu: 'Носки', labelUa: 'ШКАРПЕТКИ', icon: 'Footprints' },
 ];
 
 export const COLOR_OPTIONS: string[] = [

@@ -1047,6 +1047,7 @@ export default function App() {
   const cartTotal = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
   const handleNavClick = (menuItem: string, skipReset = false) => {
+    setCurrentPage(1);
     if (menuItem === 'БЛОГ') {
       setActiveView('blog');
       setSelectedMenu('БЛОГ');
@@ -1062,6 +1063,7 @@ export default function App() {
       setSelectedSetType(0);
       setSelectedThermalType(0);
       setSelectedEroticType(0);
+      setSelectedToysType(0);
     }
 
     const navCatKey = getCategoryKeyFromMenu(menuItem);
@@ -1457,13 +1459,13 @@ export default function App() {
         </div>
       </header>
 
-      {/* 3. Hot Pink Brand Menu Bar */}
+      {/* 3. Hot Pink Brand Menu Bar (Desktop & Tablet only) */}
       <div 
         onMouseLeave={() => setHoveredMenu(null)}
-        className="relative z-40 hidden md:block"
+        className="hidden md:block sticky top-0 z-40 shadow-md"
       >
-        <nav className="bg-[#e02484] shadow-md select-none w-full border-b border-[#c0146f] relative z-20">
-          <div className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide flex items-center justify-between gap-1 py-1">
+        <nav className="bg-[#e02484] select-none w-full border-b border-[#c0146f] relative z-20">
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 overflow-x-auto scrollbar-hide flex items-center justify-start md:justify-between gap-1 py-1">
             {['БЮСТГАЛЬТЕРИ', 'ТРУСИКИ', 'ОДЯГ ДЛЯ ДОМУ', 'КУПАЛЬНИКИ', 'КОМПЛЕКТИ БІЛИЗНИ', 'ТЕРМОБІЛИЗНА', 'ЕРОТИЧНА БІЛИЗНА', 'ІГРАШКИ ТА АКСЕСУАРИ', 'ШКАРПЕТКИ'].map(menu => {
               const isActive = selectedMenu === menu;
               return (
@@ -1471,7 +1473,7 @@ export default function App() {
                   key={menu}
                   onClick={() => handleNavClick(menu)}
                   onMouseEnter={() => setHoveredMenu(menu)}
-                  className={`px-3 py-3 text-[11px] font-extrabold text-white tracking-wider uppercase transition-all whitespace-nowrap rounded cursor-pointer animate-none ${
+                  className={`px-3 py-2.5 sm:py-3 text-[11px] font-extrabold text-white tracking-wider uppercase transition-all whitespace-nowrap rounded cursor-pointer shrink-0 animate-none ${
                     isActive ? 'bg-[#980f52]' : 'hover:bg-[#c0146f]'
                   }`}
                 >
@@ -1744,7 +1746,7 @@ export default function App() {
         <div className="lg:col-span-1 space-y-6">
           
           {/* Dynamic Category Navigation pills */}
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
+          <div className="bg-white p-4 sm:p-5 rounded-xl border border-pink-100 lg:border-gray-200 shadow-md lg:shadow-sm space-y-4 sticky top-0 z-30 lg:static backdrop-blur-md bg-white/98 max-h-[85vh] overflow-y-auto scrollbar-hide">
             <button 
               onClick={() => setIsCategoriesExpanded(!isCategoriesExpanded)}
               className="w-full font-sans font-bold text-gray-900 text-sm tracking-tight border-b border-gray-100 pb-2 flex items-center justify-between cursor-pointer focus:outline-none"

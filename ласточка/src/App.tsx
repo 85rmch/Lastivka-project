@@ -245,6 +245,7 @@ export default function App() {
   const [sortBy, setSortBy] = useState<string>('default'); // 'default', 'priceAsc', 'priceDesc', 'stock'
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(true);
+  const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState<boolean>(false);
   const [expandedCategoryKeys, setExpandedCategoryKeys] = useState<Set<string>>(new Set(['bras', 'panties']));
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -1738,15 +1739,198 @@ export default function App() {
 
       {activeView === 'catalog' ? (
         <>
+      {/* 4.5 Mobile Sticky Category Bar (Fixed to top of phone screen on scroll) */}
+      <div className="lg:hidden sticky top-0 z-40 bg-white/98 backdrop-blur-md border-b border-pink-200 shadow-md transition-all">
+        <div className="p-2.5 px-4 flex items-center justify-between gap-2">
+          <button
+            onClick={() => setIsMobileCategoryOpen(!isMobileCategoryOpen)}
+            className="flex items-center gap-2 bg-pink-50 hover:bg-pink-100 text-gray-900 border border-pink-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#e02484]" />
+            <span>{lang === 'ru' ? 'Категории товаров' : 'Категорії товарів'}</span>
+            <span className="bg-[#e02484] text-white text-[10px] font-bold px-2 py-0.5 rounded-full max-w-[120px] truncate">
+              {selectedCategory === 'all' 
+                ? (lang === 'ru' ? 'Все' : 'Усі') 
+                : (CATEGORIES.find(c => c.key === selectedCategory)?.[lang === 'ru' ? 'labelRu' : 'labelUa'] || '')
+              }
+            </span>
+            <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isMobileCategoryOpen ? 'rotate-180 text-[#e02484]' : ''}`} />
+          </button>
+
+          <div className="text-[11px] font-bold text-gray-500 font-mono shrink-0">
+            {filteredProducts.length} {lang === 'ru' ? 'тов.' : 'тов.'}
+          </div>
+        </div>
+
+        {/* Quick horizontal category pills */}
+        <div className="px-3 pb-2 overflow-x-auto scrollbar-hide flex items-center gap-1.5 border-t border-pink-50 pt-1.5">
+          {CATEGORIES.map(cat => {
+            const isSel = selectedCategory === cat.key;
+            return (
+              <button
+                key={cat.key}
+                onClick={() => {
+                  setSelectedCategory(cat.key);
+                  const matchingMenu = Object.keys(MENU_TRANSLATIONS).find(m => getCategoryKeyFromMenu(m) === cat.key);
+                  setSelectedMenu(matchingMenu || 'all');
+                  setSelectedPantiesType(0);
+                  setSelectedBraType(0);
+                  setSelectedPajamaType(0);
+                  setSelectedSwimwearType(0);
+                  setSelectedSetType(0);
+                  setSelectedThermalType(0);
+                  setSelectedEroticType(0);
+                  setSelectedToysType(0);
+                  setCurrentPage(1);
+                }}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
+                  isSel 
+                    ? 'bg-[#e02484] text-white shadow-2xs' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-pink-50 hover:text-[#e02484]'
+                }`}
+              >
+                {renderCategoryIcon(cat.key, `w-3 h-3 ${isSel ? 'text-white' : 'text-gray-500'}`)}
+                <span>{lang === 'ru' ? cat.labelRu : cat.labelUa}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dropdown Category Menu Drawer */}
+        <AnimatePresence>
+          {isMobileCategoryOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="border-t border-pink-200 bg-white max-h-[70vh] overflow-y-auto p-3.5 shadow-xl space-y-1.5"
+            >
+              {CATEGORIES.map(cat => {
+                const isSelected = selectedCategory === cat.key;
+                const count = allProducts.filter(p => isProductInCategory(p, cat.key)).length;
+                const subInfo = getCategorySubtypes(cat.key);
+                const hasSubtypes = subInfo !== null && subInfo.subtypes.length > 0;
+                const isExpanded = expandedCategoryKeys.has(cat.key);
+
+                return (
+                  <div key={cat.key} className="flex flex-col">
+                    <div
+                      onClick={() => {
+                        setExpandedCategoryKeys(prev => {
+                          const next = new Set(prev);
+                          if (next.has(cat.key)) {
+                            next.delete(cat.key);
+                          } else {
+                            next.add(cat.key);
+                          }
+                          return next;
+                        });
+
+                        setSelectedCategory(cat.key);
+                        const matchingMenu = Object.keys(MENU_TRANSLATIONS).find(m => getCategoryKeyFromMenu(m) === cat.key);
+                        setSelectedMenu(matchingMenu || 'all');
+                        setSelectedPantiesType(0);
+                        setSelectedBraType(0);
+                        setSelectedPajamaType(0);
+                        setSelectedSwimwearType(0);
+                        setSelectedSetType(0);
+                        setSelectedThermalType(0);
+                        setSelectedEroticType(0);
+                        setSelectedToysType(0);
+                        setCurrentPage(1);
+                      }}
+                      className={`p-2 rounded-lg text-xs font-semibold text-left flex items-center justify-between transition-all cursor-pointer select-none ${
+                        isSelected
+                          ? 'bg-pink-50 text-[#e02484] font-bold'
+                          : 'bg-transparent hover:bg-gray-50 text-gray-700'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {renderCategoryIcon(cat.key, `w-4 h-4 ${isSelected ? 'text-[#e02484]' : 'text-gray-400'}`)}
+                        <span>{lang === 'ru' ? cat.labelRu : cat.labelUa}</span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                          isSelected ? 'bg-pink-100 text-[#e02484] font-bold' : 'bg-gray-100 text-gray-400 border border-gray-200'
+                        }`}>
+                          {count}
+                        </span>
+                        {hasSubtypes && (
+                          <ChevronDown 
+                            className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                              isExpanded ? 'rotate-180 text-[#e02484]' : 'text-gray-400'
+                            }`} 
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Subcategories Accordion List */}
+                    <AnimatePresence initial={false}>
+                      {hasSubtypes && isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden pl-3 pr-1 py-1 flex flex-col gap-0.5 border-l-2 border-pink-200 ml-3.5 my-0.5"
+                        >
+                          {subInfo.subtypes.map(subType => {
+                            const isSubSelected = isSelected && subInfo.current === subType.id;
+                            const subCount = getSubtypeCount(cat.key, subType);
+
+                            return (
+                              <button
+                                key={subType.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSubtypeSelect(cat.key, subType.id, subInfo.menu, subInfo.set);
+                                  setIsMobileCategoryOpen(false);
+                                }}
+                                className={`px-2 py-1.5 rounded text-[11px] text-left flex items-center justify-between transition-all cursor-pointer ${
+                                  isSubSelected
+                                    ? 'bg-pink-100 text-[#e02484] font-extrabold shadow-2xs'
+                                    : 'text-gray-600 hover:text-gray-900 hover:bg-pink-50/60 font-medium'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 truncate pr-1">
+                                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                    isSubSelected ? 'bg-[#e02484]' : 'bg-gray-300'
+                                  }`} />
+                                  <span className="truncate">{lang === 'ru' ? subType.ru : subType.ua}</span>
+                                </div>
+                                <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono shrink-0 ${
+                                  isSubSelected 
+                                    ? 'bg-[#e02484] text-white font-bold' 
+                                    : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                  {subCount}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       {/* 5. Main Catalog Layout Area */}
       <main id="catalog-section" className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
 
         
         {/* Left column sidebar for searching, filter specs, pricing bounds */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="hidden lg:block lg:col-span-1 space-y-6">
           
           {/* Dynamic Category Navigation pills */}
-          <div className="bg-white p-4 sm:p-5 rounded-xl border border-pink-100 lg:border-gray-200 shadow-md lg:shadow-sm space-y-4 sticky top-0 z-30 lg:static backdrop-blur-md bg-white/98 max-h-[85vh] overflow-y-auto scrollbar-hide">
+          <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm space-y-4 sticky top-16 z-10 backdrop-blur-md bg-white/98 max-h-[85vh] overflow-y-auto scrollbar-hide">
             <button 
               onClick={() => setIsCategoriesExpanded(!isCategoriesExpanded)}
               className="w-full font-sans font-bold text-gray-900 text-sm tracking-tight border-b border-gray-100 pb-2 flex items-center justify-between cursor-pointer focus:outline-none"

@@ -1000,8 +1000,6 @@ export default function App() {
       setSelectedMenu('all');
       setSearchQuery('');
     }
-    const translatedLabel = MENU_TRANSLATIONS[menuItem]?.[lang] || menuItem;
-    triggerToast(lang === 'ru' ? `Раздел "${translatedLabel}" выбран` : `Розділ "${translatedLabel}" обрано`, 'info');
   };
 
   return (
@@ -1194,7 +1192,6 @@ export default function App() {
           </a>
         </div>
         <div className="flex items-center gap-4">
-          <span className="hover:text-[#e02484] cursor-pointer transition-colors font-medium">{lang === 'ru' ? 'Постоянный покупатель' : 'Постійний покупець'}</span>
           <span 
             className="hover:text-[#e02484] cursor-pointer transition-colors font-medium flex items-center gap-1"
             onClick={() => { resetFilters(); setSelectedCategory('favorites' as any); }}

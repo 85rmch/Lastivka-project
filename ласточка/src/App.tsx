@@ -244,7 +244,8 @@ export default function App() {
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('default'); // 'default', 'priceAsc', 'priceDesc', 'stock'
   const [showFilters, setShowFilters] = useState<boolean>(false);
-  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(false);
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(true);
+  const [expandedCategoryKeys, setExpandedCategoryKeys] = useState<Set<string>>(new Set(['bras', 'panties']));
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Reset page when search or filters change
@@ -599,6 +600,81 @@ export default function App() {
       default:
         return null;
     }
+  };
+
+  // Ensure current category is expanded in sidebar accordion
+  useEffect(() => {
+    if (selectedCategory && selectedCategory !== 'all') {
+      setExpandedCategoryKeys(prev => {
+        if (prev.has(selectedCategory)) return prev;
+        const next = new Set(prev);
+        next.add(selectedCategory);
+        return next;
+      });
+    }
+  }, [selectedCategory]);
+
+  // Helper to get subtypes configuration for a category key
+  const getCategorySubtypes = (catKey: CategoryKey) => {
+    switch (catKey) {
+      case 'bras':
+        return { subtypes: BRA_SUBTYPES, current: selectedBraType, set: setSelectedBraType, menu: 'БЮСТГАЛЬТЕРИ' };
+      case 'panties':
+        return { subtypes: PANTIES_SUBTYPES, current: selectedPantiesType, set: setSelectedPantiesType, menu: 'ТРУСИКИ' };
+      case 'home':
+        return { subtypes: PAJAMA_SUBTYPES, current: selectedPajamaType, set: setSelectedPajamaType, menu: 'ОДЯГ ДЛЯ ДОМУ' };
+      case 'swimwear':
+        return { subtypes: SWIMWEAR_SUBTYPES, current: selectedSwimwearType, set: setSelectedSwimwearType, menu: 'КУПАЛЬНИКИ' };
+      case 'sets':
+        return { subtypes: SET_SUBTYPES, current: selectedSetType, set: setSelectedSetType, menu: 'КОМПЛЕКТИ БІЛИЗНИ' };
+      case 'thermals':
+        return { subtypes: THERMAL_SUBTYPES, current: selectedThermalType, set: setSelectedThermalType, menu: 'ТЕРМОБІЛИЗНА' };
+      case 'erotic':
+        return { subtypes: EROTIC_SUBTYPES, current: selectedEroticType, set: setSelectedEroticType, menu: 'ЕРОТИЧНА БІЛИЗНА' };
+      case 'toys_accessories':
+        return { subtypes: TOYS_SUBTYPES, current: selectedToysType, set: setSelectedToysType, menu: 'ІГРАШКИ ТА АКСЕСУАРИ' };
+      default:
+        return null;
+    }
+  };
+
+  // Calculate count of products matching a category subtype
+  const getSubtypeCount = (catKey: CategoryKey, subType: { id: number; match: string[] }) => {
+    if (subType.id === 0) {
+      return allProducts.filter(p => isProductInCategory(p, catKey)).length;
+    }
+    return allProducts.filter(p => {
+      if (!isProductInCategory(p, catKey)) return false;
+      const nameLower = p.name.toLowerCase();
+      const codeLower = p.product_code.toLowerCase();
+      const catLower = (p.category || '').toLowerCase();
+      const vendorLower = (p.vendor_code || '').toLowerCase();
+      const descLower = (p.description || '').toLowerCase();
+      return subType.match.some(m => 
+        nameLower.includes(m) || 
+        codeLower.includes(m) || 
+        catLower.includes(m) || 
+        vendorLower.includes(m) || 
+        descLower.includes(m)
+      );
+    }).length;
+  };
+
+  // Select a category subtype filter
+  const handleSubtypeSelect = (catKey: CategoryKey, subTypeId: number, menuName: string, setter: (id: number) => void) => {
+    setSelectedPantiesType(0);
+    setSelectedBraType(0);
+    setSelectedPajamaType(0);
+    setSelectedSwimwearType(0);
+    setSelectedSetType(0);
+    setSelectedThermalType(0);
+    setSelectedEroticType(0);
+    setSelectedToysType(0);
+
+    setSelectedCategory(catKey);
+    setSelectedMenu(menuName);
+    setter(subTypeId);
+    setCurrentPage(1);
   };
 
   // Filter & Search computation
@@ -1661,39 +1737,111 @@ export default function App() {
                   {CATEGORIES.map(cat => {
                     const isSelected = selectedCategory === cat.key;
                     const count = allProducts.filter(p => isProductInCategory(p, cat.key)).length;
-                    
+                    const subInfo = getCategorySubtypes(cat.key);
+                    const hasSubtypes = subInfo !== null && subInfo.subtypes.length > 0;
+                    const isExpanded = expandedCategoryKeys.has(cat.key);
+
                     return (
-                      <button
-                        key={cat.key}
-                        onClick={() => {
-                          setSelectedCategory(cat.key);
-                          const matchingMenu = Object.keys(MENU_TRANSLATIONS).find(m => getCategoryKeyFromMenu(m) === cat.key);
-                          setSelectedMenu(matchingMenu || 'all');
-                          setSelectedPantiesType(0);
-                          setSelectedBraType(0);
-                          setSelectedPajamaType(0);
-                          setSelectedSwimwearType(0);
-                          setSelectedSetType(0);
-                          setSelectedThermalType(0);
-                          setSelectedEroticType(0);
-                          setSelectedToysType(0);
-                        }}
-                        className={`p-2.5 rounded-lg text-xs font-semibold text-left flex items-center justify-between transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-pink-50 text-[#e02484] shadow-sm font-bold'
-                            : 'bg-transparent hover:bg-gray-50 text-gray-600 hover:text-gray-900'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          {renderCategoryIcon(cat.key, `w-4 h-4 ${isSelected ? 'text-[#e02484]' : 'text-gray-400'}`)}
-                          <span>{lang === 'ru' ? cat.labelRu : cat.labelUa}</span>
+                      <div key={cat.key} className="flex flex-col">
+                        <div
+                          onClick={() => {
+                            setExpandedCategoryKeys(prev => {
+                              const next = new Set(prev);
+                              if (next.has(cat.key)) {
+                                next.delete(cat.key);
+                              } else {
+                                next.add(cat.key);
+                              }
+                              return next;
+                            });
+
+                            setSelectedCategory(cat.key);
+                            const matchingMenu = Object.keys(MENU_TRANSLATIONS).find(m => getCategoryKeyFromMenu(m) === cat.key);
+                            setSelectedMenu(matchingMenu || 'all');
+                            setSelectedPantiesType(0);
+                            setSelectedBraType(0);
+                            setSelectedPajamaType(0);
+                            setSelectedSwimwearType(0);
+                            setSelectedSetType(0);
+                            setSelectedThermalType(0);
+                            setSelectedEroticType(0);
+                            setSelectedToysType(0);
+                            setCurrentPage(1);
+                          }}
+                          className={`p-2.5 rounded-lg text-xs font-semibold text-left flex items-center justify-between transition-all cursor-pointer select-none ${
+                            isSelected
+                              ? 'bg-pink-50 text-[#e02484] shadow-2xs font-bold'
+                              : 'bg-transparent hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            {renderCategoryIcon(cat.key, `w-4 h-4 ${isSelected ? 'text-[#e02484]' : 'text-gray-400'}`)}
+                            <span>{lang === 'ru' ? cat.labelRu : cat.labelUa}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                              isSelected ? 'bg-pink-100 text-[#e02484] font-bold' : 'bg-gray-100 text-gray-400 border border-gray-200'
+                            }`}>
+                              {count}
+                            </span>
+                            {hasSubtypes && (
+                              <ChevronDown 
+                                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                                  isExpanded ? 'rotate-180 text-[#e02484]' : 'text-gray-400'
+                                }`} 
+                              />
+                            )}
+                          </div>
                         </div>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
-                          isSelected ? 'bg-pink-100 text-[#e02484]' : 'bg-gray-100 text-gray-400 border border-gray-200'
-                        }`}>
-                          {count}
-                        </span>
-                      </button>
+
+                        {/* Subcategories Accordion List */}
+                        <AnimatePresence initial={false}>
+                          {hasSubtypes && isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2, ease: 'easeInOut' }}
+                              className="overflow-hidden pl-3 pr-1 py-1 flex flex-col gap-0.5 border-l-2 border-pink-200 ml-3.5 my-1"
+                            >
+                              {subInfo.subtypes.map(subType => {
+                                const isSubSelected = isSelected && subInfo.current === subType.id;
+                                const subCount = getSubtypeCount(cat.key, subType);
+
+                                return (
+                                  <button
+                                    key={subType.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSubtypeSelect(cat.key, subType.id, subInfo.menu, subInfo.set);
+                                    }}
+                                    className={`px-2 py-1.5 rounded text-[11px] text-left flex items-center justify-between transition-all cursor-pointer ${
+                                      isSubSelected
+                                        ? 'bg-pink-100 text-[#e02484] font-extrabold shadow-2xs'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-pink-50/60 font-medium'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2 truncate pr-1">
+                                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                                        isSubSelected ? 'bg-[#e02484]' : 'bg-gray-300'
+                                      }`} />
+                                      <span className="truncate">{lang === 'ru' ? subType.ru : subType.ua}</span>
+                                    </div>
+                                    <span className={`text-[9px] px-1.5 py-0.2 rounded font-mono shrink-0 ${
+                                      isSubSelected 
+                                        ? 'bg-[#e02484] text-white font-bold' 
+                                        : 'bg-gray-100 text-gray-500'
+                                    }`}>
+                                      {subCount}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     );
                   })}
                 </motion.div>

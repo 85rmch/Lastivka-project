@@ -33,6 +33,13 @@ export default function AdminBanners({ lang = 'ua', onBannersUpdated }: AdminBan
     setBanners(list);
   };
 
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    onConfirm: () => void;
+  }>({ isOpen: false, title: '', onConfirm: () => {} });
+
   const resetForm = () => {
     setEditingBannerId(null);
     setImage('');
@@ -75,7 +82,7 @@ export default function AdminBanners({ lang = 'ua', onBannersUpdated }: AdminBan
     }
   };
 
-  const handleSaveBanner = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!image) {
       setStatusMsg({
@@ -84,21 +91,22 @@ export default function AdminBanners({ lang = 'ua', onBannersUpdated }: AdminBan
       });
       return;
     }
-    if (!titleRu && !titleUa) {
-      setStatusMsg({
-        type: 'error',
-        text: lang === 'ru' ? 'Введите заголовок баннера' : 'Введіть заголовок банера'
-      });
-      return;
-    }
 
+    setConfirmModal({
+      isOpen: true,
+      title: lang === 'ru' ? 'Сохранить изменения в баннерах?' : 'Зберегти зміни в банерах?',
+      onConfirm: () => executeSaveBanner()
+    });
+  };
+
+  const executeSaveBanner = () => {
     let nextBanners: Banner[];
     if (editingBannerId) {
       nextBanners = banners.map(b => b.id === editingBannerId ? {
         id: editingBannerId,
         image,
-        titleRu: titleRu || titleUa,
-        titleUa: titleUa || titleRu,
+        titleRu: titleRu || titleUa || '',
+        titleUa: titleUa || titleRu || '',
         subtitleRu,
         subtitleUa,
         accentText,
@@ -108,8 +116,8 @@ export default function AdminBanners({ lang = 'ua', onBannersUpdated }: AdminBan
       const newBanner: Banner = {
         id: 'banner_' + Date.now(),
         image,
-        titleRu: titleRu || titleUa,
-        titleUa: titleUa || titleRu,
+        titleRu: titleRu || titleUa || '',
+        titleUa: titleUa || titleRu || '',
         subtitleRu,
         subtitleUa,
         accentText,
@@ -130,14 +138,24 @@ export default function AdminBanners({ lang = 'ua', onBannersUpdated }: AdminBan
     if (onBannersUpdated) onBannersUpdated();
   };
 
-  const handleDeleteBanner = (id: string) => {
-    if (window.confirm(lang === 'ru' ? 'Удалить этот баннер?' : 'Видалити цей банер?')) {
-      const next = banners.filter(b => b.id !== id);
-      saveAllBanners(next);
-      setBanners(next);
-      if (editingBannerId === id) resetForm();
-      if (onBannersUpdated) onBannersUpdated();
-    }
+  const triggerDeleteConfirm = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: lang === 'ru' ? 'Вы уверены, что хотите удалить этот баннер?' : 'Ви впевнені, що хочете видалити цей банер?',
+      onConfirm: () => executeDeleteBanner(id)
+    });
+  };
+
+  const executeDeleteBanner = (id: string) => {
+    const next = banners.filter(b => b.id !== id);
+    saveAllBanners(next);
+    setBanners(next);
+    if (editingBannerId === id) resetForm();
+    if (onBannersUpdated) onBannersUpdated();
+    setStatusMsg({
+      type: 'success',
+      text: lang === 'ru' ? 'Баннер успешно удален!' : 'Банер успішно видалено!'
+    });
   };
 
   const handleMove = (index: number, direction: 'up' | 'down') => {
@@ -274,7 +292,7 @@ export default function AdminBanners({ lang = 'ua', onBannersUpdated }: AdminBan
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDeleteBanner(b.id)}
+                    onClick={() => triggerDeleteConfirm(b.id)}
                     className="p-1.5 text-red-400 hover:text-red-300 rounded hover:bg-red-500/10 transition-colors cursor-pointer"
                     title={lang === 'ru' ? 'Удалить' : 'Видалити'}
                   >
@@ -307,7 +325,7 @@ export default function AdminBanners({ lang = 'ua', onBannersUpdated }: AdminBan
             )}
           </div>
 
-          <form onSubmit={handleSaveBanner} className="space-y-3.5">
+          <form onSubmit={handleFormSubmit} className="space-y-3.5">
             
             {/* Banner Image Preview / Upload */}
             <div>
@@ -440,6 +458,40 @@ export default function AdminBanners({ lang = 'ua', onBannersUpdated }: AdminBan
         </div>
 
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="bg-[#1c1c1c] rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-white/10 animate-in fade-in zoom-in duration-150 text-white">
+            <h3 className="text-sm font-bold text-white mb-2 text-center">
+              {confirmModal.title}
+            </h3>
+            <p className="text-xs text-gray-400 text-center mb-6">
+              {lang === 'ru' ? 'Подтвердите действие для сохранения изменений.' : 'Підтвердіть дію для збереження змін.'}
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-gray-300 text-xs font-semibold rounded-xl transition-colors flex-1 cursor-pointer"
+              >
+                {lang === 'ru' ? 'Нет' : 'Ні'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const action = confirmModal.onConfirm;
+                  setConfirmModal({ ...confirmModal, isOpen: false });
+                  action();
+                }}
+                className="px-4 py-2.5 bg-[#d4af37] hover:bg-[#c49f27] text-black text-xs font-bold rounded-xl shadow-md transition-colors flex-1 cursor-pointer"
+              >
+                {lang === 'ru' ? 'Да' : 'Так'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

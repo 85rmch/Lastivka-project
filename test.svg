@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 116" width="480" height="116">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&amp;family=Marck+Script&amp;display=swap');
-    .text { font-family: 'Marck Script', 'Caveat', cursive; font-size: 82px; fill: #e02484; font-weight: bold; }
-  </style>
-  <text x="10" y="85" class="text">Ластівка</text>
-</svg>

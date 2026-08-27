@@ -1256,15 +1256,40 @@ export default function App() {
           </button>
         </div>
         <div className="flex items-center gap-4">
-          <span 
-            className="hover:text-[#e02484] cursor-pointer transition-colors font-medium flex items-center gap-1"
+          {/* New Arrivals Button */}
+          <button
+            onClick={() => handleNavClick('НОВИНКИ')}
+            className={`hover:text-[#e02484] cursor-pointer transition-colors font-semibold flex items-center gap-1 text-[11px] ${
+              selectedMenu === 'НОВИНКИ' || (selectedCategory === 'new' && activeView === 'catalog')
+                ? 'text-[#e02484] font-bold'
+                : 'text-gray-700 hover:text-gray-900'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#e02484]" />
+            <span>{lang === 'ru' ? 'Новинки' : 'Новинки'}</span>
+          </button>
+
+          {/* Blog Button */}
+          <button
+            onClick={() => handleNavClick('БЛОГ')}
+            className={`hover:text-[#e02484] cursor-pointer transition-colors font-semibold flex items-center gap-1 text-[11px] ${
+              activeView === 'blog'
+                ? 'text-[#e02484] font-bold'
+                : 'text-gray-700 hover:text-gray-900'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5 text-[#e02484]" />
+            <span>{lang === 'ru' ? 'Блог' : 'Блог'}</span>
+          </button>
+
+          {/* Favorites */}
+          <button 
+            className="hover:text-[#e02484] cursor-pointer transition-colors font-semibold flex items-center gap-1 text-[11px] text-gray-700 hover:text-gray-900"
             onClick={() => { resetFilters(); setSelectedCategory('favorites' as any); }}
           >
             <Heart className="w-3.5 h-3.5 text-[#e02484] fill-[#e02484]" />
-            {lang === 'ru' ? `Избранное (${favorites.length})` : `Вподобання (${favorites.length})`}
-          </span>
-
-          
+            <span>{lang === 'ru' ? `Избранное (${favorites.length})` : `Вподобання (${favorites.length})`}</span>
+          </button>
         </div>
       </div>
 
@@ -1434,7 +1459,7 @@ export default function App() {
       >
         <nav className="bg-[#e02484] shadow-md select-none w-full border-b border-[#c0146f] relative z-20">
           <div className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide flex items-center justify-between gap-1 py-1">
-            {['БЮСТГАЛЬТЕРИ', 'ТРУСИКИ', 'ОДЯГ ДЛЯ ДОМУ', 'КУПАЛЬНИКИ', 'КОМПЛЕКТИ БІЛИЗНИ', 'ТЕРМОБІЛИЗНА', 'ЕРОТИЧНА БІЛИЗНА', 'ІГРАШКИ ТА АКСЕСУАРИ', 'ШКАРПЕТКИ', 'НОВИНКИ', 'БЛОГ'].map(menu => {
+            {['БЮСТГАЛЬТЕРИ', 'ТРУСИКИ', 'ОДЯГ ДЛЯ ДОМУ', 'КУПАЛЬНИКИ', 'КОМПЛЕКТИ БІЛИЗНИ', 'ТЕРМОБІЛИЗНА', 'ЕРОТИЧНА БІЛИЗНА', 'ІГРАШКИ ТА АКСЕСУАРИ', 'ШКАРПЕТКИ'].map(menu => {
               const isActive = selectedMenu === menu;
               return (
                 <button

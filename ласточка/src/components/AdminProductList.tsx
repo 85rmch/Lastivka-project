@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Product } from '../types';
-import { fetchSupabaseProducts } from '../lib/supabase';
-import { Loader2, Edit, Search, X } from 'lucide-react';
+import { fetchSupabaseProducts, updateProduct } from '../lib/supabase';
+import { Loader2, Edit, Search, X, Eye, EyeOff } from 'lucide-react';
 import AdminProductEdit from './AdminProductEdit';
 import { getCleanImage, CATEGORIES } from '../data';
 
@@ -97,41 +97,104 @@ export default function AdminProductList({ isOpen, onConfigChange, selectedCateg
       )}
       
       <div className="grid grid-cols-1 gap-4">
-        {filteredProducts.map(product => (
-          <div key={product.id} className="p-5 bg-[#161616] hover:bg-[#1a1a1a] border border-white/10 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition-all shadow-sm">
-            <div className="flex items-start sm:items-center gap-5 w-full">
-              <img 
-                src={getCleanImage(product, 0)} 
-                alt={product.name} 
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  if (target.src !== 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=200&auto=format&fit=crop') {
-                    target.src = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=200&auto=format&fit=crop';
-                  }
-                }}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover bg-[#121212] border border-white/5 shrink-0" 
-              />
-              <div className="flex-1 space-y-1.5">
-                <h4 className="text-white text-base font-bold">{product.name}</h4>
-                <p className="text-[#a19992] text-sm">{lang === 'ru' ? 'Код:' : 'Код:'} {product.product_code}</p>
-                {product.vendor_code && <p className="text-[#6b645d] text-xs">{lang === 'ru' ? 'Артикул:' : 'Артикул:'} {product.vendor_code}</p>}
-                <div className="flex flex-wrap items-center gap-4 mt-2 pt-2 border-t border-white/5">
-                    <span className="text-[#d4af37] font-semibold text-sm">{product.price} ₴</span>
-                    <span className="text-[#a19992] text-xs bg-[#222] px-2 py-1 rounded-md">{lang === 'ru' ? 'Остаток:' : 'Залишок:'} {product.stock} {lang === 'ru' ? 'шт' : 'шт'}</span>
-                    {product.sizes && <span className="text-[#a19992] text-xs bg-[#222] px-2 py-1 rounded-md">{lang === 'ru' ? 'Размеры:' : 'Розміри:'} {product.sizes}</span>}
+        {filteredProducts.map(product => {
+          const isHidden = Boolean(product.isHidden || (product as any).is_hidden);
+          const handleToggleHide = async (e: React.MouseEvent) => {
+            e.stopPropagation();
+            const nextHidden = !isHidden;
+
+            // Optimistically update list state immediately for instant feedback
+            setProducts(prev => prev.map(p => {
+              if ((product.id && p.id === product.id) || (product.product_code && p.product_code === product.product_code)) {
+                return { ...p, isHidden: nextHidden, is_hidden: nextHidden };
+              }
+              return p;
+            }));
+
+            await updateProduct({
+              ...product,
+              isHidden: nextHidden,
+              is_hidden: nextHidden
+            });
+            
+            onConfigChange();
+          };
+
+          return (
+            <div 
+              key={product.id} 
+              className={`p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 transition-all shadow-sm border ${
+                isHidden 
+                  ? 'bg-[#181512] border-amber-500/20 hover:border-amber-500/40 opacity-80' 
+                  : 'bg-[#161616] hover:bg-[#1a1a1a] border-white/10'
+              }`}
+            >
+              <div className="flex items-start sm:items-center gap-5 w-full">
+                <div className="relative shrink-0">
+                  <img 
+                    src={getCleanImage(product, 0)} 
+                    alt={product.name} 
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=200&auto=format&fit=crop') {
+                        target.src = 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=200&auto=format&fit=crop';
+                      }
+                    }}
+                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover bg-[#121212] border border-white/5" 
+                  />
+                  {isHidden && (
+                    <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center text-amber-400">
+                      <EyeOff className="w-8 h-8" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h4 className="text-white text-base font-bold">{product.name}</h4>
+                    {isHidden && (
+                      <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-md text-[10px] font-semibold flex items-center gap-1">
+                        <EyeOff className="w-3 h-3" />
+                        {lang === 'ru' ? 'Скрыт' : 'Схований'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[#a19992] text-sm">{lang === 'ru' ? 'Код:' : 'Код:'} {product.product_code}</p>
+                  {product.vendor_code && <p className="text-[#6b645d] text-xs">{lang === 'ru' ? 'Артикул:' : 'Артикул:'} {product.vendor_code}</p>}
+                  <div className="flex flex-wrap items-center gap-4 mt-2 pt-2 border-t border-white/5">
+                      <span className="text-[#d4af37] font-semibold text-sm">{product.price} ₴</span>
+                      <span className="text-[#a19992] text-xs bg-[#222] px-2 py-1 rounded-md">{lang === 'ru' ? 'Остаток:' : 'Залишок:'} {product.stock} {lang === 'ru' ? 'шт' : 'шт'}</span>
+                      {product.sizes && <span className="text-[#a19992] text-xs bg-[#222] px-2 py-1 rounded-md">{lang === 'ru' ? 'Размеры:' : 'Розміри:'} {product.sizes}</span>}
+                  </div>
                 </div>
               </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                <button
+                  onClick={handleToggleHide}
+                  title={isHidden ? (lang === 'ru' ? 'Показать товар в магазине' : 'Показати товар у магазині') : (lang === 'ru' ? 'Скрыть товар из магазина' : 'Сховати товар з магазину')}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-center gap-2 text-xs font-bold ${
+                    isHidden 
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30' 
+                      : 'bg-white/5 text-gray-300 border-white/10 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {isHidden ? <EyeOff className="w-4 h-4 text-amber-400" /> : <Eye className="w-4 h-4 text-emerald-400" />}
+                  <span className="sm:hidden">{isHidden ? (lang === 'ru' ? 'Показать' : 'Показати') : (lang === 'ru' ? 'Скрыть' : 'Сховати')}</span>
+                </button>
+
+                <button
+                  onClick={() => setEditingProduct(product)}
+                  className="p-3 flex-1 sm:flex-initial bg-white/5 hover:bg-[#d4af37] text-white hover:text-black rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span className="text-xs font-bold sm:hidden">{lang === 'ru' ? 'Редактировать' : 'Редагувати'}</span>
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => setEditingProduct(product)}
-              className="p-3 w-full sm:w-auto bg-white/5 hover:bg-[#d4af37] text-white hover:text-black rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              <span className="text-xs font-bold sm:hidden">{lang === 'ru' ? 'Редактировать' : 'Редагувати'}</span>
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

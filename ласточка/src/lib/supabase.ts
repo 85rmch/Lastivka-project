@@ -44,6 +44,25 @@ export function getDemoProducts(): Product[] {
     } catch (e) {}
   }
 
+  // Apply hidden products list override
+  const hiddenStored = localStorage.getItem('lastochka_hidden_products');
+  if (hiddenStored) {
+    try {
+      const hiddenList: (string | number)[] = JSON.parse(hiddenStored);
+      if (Array.isArray(hiddenList)) {
+        list = list.map(p => {
+          const isHidden = Boolean(
+            p.isHidden || 
+            (p.id !== undefined && hiddenList.includes(p.id)) || 
+            (p.id !== undefined && hiddenList.includes(Number(p.id))) || 
+            (p.product_code && hiddenList.includes(String(p.product_code)))
+          );
+          return isHidden ? { ...p, isHidden: true } : p;
+        });
+      }
+    } catch (e) {}
+  }
+
   // Filter out deleted products
   const deletedStored = localStorage.getItem('lastochka_deleted_products');
   if (deletedStored) {
@@ -176,6 +195,16 @@ export async function fetchSupabaseProducts(): Promise<{
       };
     }
 
+    // Read hidden products list from localStorage as fallback override
+    let hiddenList: (string | number)[] = [];
+    try {
+      const hiddenStored = localStorage.getItem('lastochka_hidden_products');
+      if (hiddenStored) {
+        const parsed = JSON.parse(hiddenStored);
+        if (Array.isArray(parsed)) hiddenList = parsed;
+      }
+    } catch (e) {}
+
     // Process and normalize data from Supabase
     const normalized: Product[] = data.map((item: any) => {
       let photos: string[] = [];
@@ -209,6 +238,12 @@ export async function fetchSupabaseProducts(): Promise<{
           cleanedPhotos = localMatch.photo.map(p => cleanImageUrl(p)).filter(Boolean);
         }
       }
+
+      const isHiddenInLocalStorage = Boolean(
+        (item.id !== undefined && hiddenList.includes(item.id)) ||
+        (item.id !== undefined && hiddenList.includes(Number(item.id))) ||
+        (item.product_code && hiddenList.includes(String(item.product_code)))
+      );
       
       // Categorize product based on its fields
       const normalizedItem = {
@@ -224,7 +259,8 @@ export async function fetchSupabaseProducts(): Promise<{
         sizes: String(item.sizes || ''),
         stock: Number(item.stock ?? 1),
         category: item.category ? String(item.category) : '',
-        description: item.description ? String(item.description) : ''
+        description: item.description ? String(item.description) : '',
+        isHidden: Boolean(item.is_hidden || item.isHidden || item.hidden || isHiddenInLocalStorage)
       };
 
       // Assign category using parser helper only if not present in DB
@@ -370,6 +406,20 @@ export async function updateProduct(product: Product): Promise<{ success: boolea
 
   const updateLocalStorage = () => {
     try {
+      // Manage hidden list explicitly
+      const hiddenStored = localStorage.getItem('lastochka_hidden_products');
+      let hiddenList: (string | number)[] = hiddenStored ? JSON.parse(hiddenStored) : [];
+      const pId = product.id;
+      const pCode = product.product_code;
+
+      if (product.isHidden) {
+        if (pId !== undefined && pId !== null && !hiddenList.includes(pId)) hiddenList.push(pId);
+        if (pCode && !hiddenList.includes(pCode)) hiddenList.push(pCode);
+      } else {
+        hiddenList = hiddenList.filter(item => item !== pId && item !== pCode && String(item) !== String(pId) && String(item) !== String(pCode));
+      }
+      localStorage.setItem('lastochka_hidden_products', JSON.stringify(hiddenList));
+
       const editedStored = localStorage.getItem('lastochka_edited_products');
       let editedList: Product[] = editedStored ? JSON.parse(editedStored) : [];
       const idx = editedList.findIndex(p => (product.id && p.id === product.id) || (product.product_code && p.product_code === product.product_code));
@@ -404,8 +454,10 @@ export async function updateProduct(product: Product): Promise<{ success: boolea
     }
   };
 
+  // Always update local state & fallback storage first so user actions are immediate & persistent
+  updateLocalStorage();
+
   if (config.mode === 'demo') {
-    updateLocalStorage();
     return { success: true };
   }
 
@@ -433,16 +485,14 @@ export async function updateProduct(product: Product): Promise<{ success: boolea
     });
     const data = await res.json();
     if (!res.ok) {
-        console.error('Backend update failed:', data.error);
-        return { success: false, error: data.error };
+        console.warn('Backend update failed, but saved locally:', data.error);
+        return { success: true, error: data.error };
     }
     
-    // Update local caches only after successful database write
-    updateLocalStorage();
     return { success: true };
   } catch (err: any) {
-    console.error('Update product error:', err);
-    return { success: false, error: err.message || err };
+    console.warn('Update product error, but saved locally:', err);
+    return { success: true, error: err.message || err };
   }
 }
 

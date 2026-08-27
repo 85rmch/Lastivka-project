@@ -603,29 +603,41 @@ router.post("/api/products/update", async (req, res) => {
       photo: product.photo,
       sizes: product.sizes,
       stock: product.stock,
+      is_hidden: product.isHidden ?? product.is_hidden ?? false,
     };
 
     const targetTable = tableName || serverConfig.tableName || "products";
     let updateRes = null;
 
-    // 1. Try updating by ID first if product.id exists
-    if (product.id) {
-      updateRes = await supabase
-        .from(targetTable)
-        .update(dbProduct)
-        .eq("id", product.id)
-        .select();
-    }
-
-    // 2. If no rows updated by ID (or no product.id), try updating by product_code
-    if (!updateRes?.data || updateRes.data.length === 0) {
-      if (product.product_code) {
-        updateRes = await supabase
+    // Helper execute update
+    const executeUpdate = async (dataToSave: any) => {
+      let res = null;
+      if (product.id) {
+        res = await supabase
           .from(targetTable)
-          .update(dbProduct)
-          .eq("product_code", product.product_code)
+          .update(dataToSave)
+          .eq("id", product.id)
           .select();
       }
+      if (!res?.data || res.data.length === 0) {
+        if (product.product_code) {
+          res = await supabase
+            .from(targetTable)
+            .update(dataToSave)
+            .eq("product_code", product.product_code)
+            .select();
+        }
+      }
+      return res;
+    };
+
+    updateRes = await executeUpdate(dbProduct);
+
+    // Fallback if is_hidden column does not exist in custom schema
+    if (updateRes?.error && (updateRes.error.message?.includes('is_hidden') || updateRes.error.code === '42703')) {
+      const dbProductFallback = { ...dbProduct };
+      delete dbProductFallback.is_hidden;
+      updateRes = await executeUpdate(dbProductFallback);
     }
 
     if (updateRes?.error) return res.status(400).json({ error: updateRes.error.message });

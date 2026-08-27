@@ -12,6 +12,7 @@ export interface Product {
   stock: number;
   category: string;
   description?: string;
+  isHidden?: boolean;
 }
 
 export type CategoryKey = 

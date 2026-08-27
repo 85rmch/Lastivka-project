@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Sparkles, 
   Search, 
@@ -562,12 +562,17 @@ export default function App() {
     saveCart([]);
   };
 
+  // Compute visible products for storefront (excluding hidden products)
+  const visibleProducts = useMemo(() => {
+    return allProducts.filter(p => !p.isHidden && !(p as any).is_hidden);
+  }, [allProducts]);
+
   // Compute colors, sizes and prices dynamically from products to feed filter options
   const allUniqueSizes = Array.from(
-    new Set(allProducts.flatMap(p => p.sizes ? p.sizes.split(',').map(s => s.trim()) : []))
+    new Set(visibleProducts.flatMap(p => p.sizes ? p.sizes.split(',').map(s => s.trim()) : []))
   ).filter(s => s !== '' && s !== '1' && s !== '---') as string[];
 
-  const maxProductPrice = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.price)) : 1200;
+  const maxProductPrice = visibleProducts.length > 0 ? Math.max(...visibleProducts.map(p => p.price)) : 1200;
 
   // Helper to map menu items to CategoryKeys
   const getCategoryKeyFromMenu = (menuName: string): CategoryKey | null => {
@@ -641,9 +646,9 @@ export default function App() {
   // Calculate count of products matching a category subtype
   const getSubtypeCount = (catKey: CategoryKey, subType: { id: number; match: string[] }) => {
     if (subType.id === 0) {
-      return allProducts.filter(p => isProductInCategory(p, catKey)).length;
+      return visibleProducts.filter(p => isProductInCategory(p, catKey)).length;
     }
-    return allProducts.filter(p => {
+    return visibleProducts.filter(p => {
       if (!isProductInCategory(p, catKey)) return false;
       const nameLower = p.name.toLowerCase();
       const codeLower = p.product_code.toLowerCase();
@@ -678,7 +683,7 @@ export default function App() {
   };
 
   // Filter & Search computation
-  const filteredProducts = allProducts.filter(product => {
+  const filteredProducts = visibleProducts.filter(product => {
     // 1. Text Search query
     const text = searchQuery.toLowerCase();
     const matchesSearch = 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Trash2, ShoppingBag, Truck, CheckCircle2, ArrowRight, Bell } from 'lucide-react';
+import { X, Trash2, ShoppingBag, Truck, MapPin, CheckCircle2, ArrowRight, Bell } from 'lucide-react';
 import { CartItem, Order } from '../types';
 import { getCleanImage } from '../data';
 import { motion } from 'motion/react';
@@ -96,16 +96,14 @@ export default function CartDrawer({
       methods: {
         np: 'Новая Почта (в отделение)',
         up: 'Укрпочта',
+        courier: 'Доставка курьером по г. Кривой Рог',
         pickup: 'Самовывоз (Кривой Рог)'
       },
       addressLabel: 'Адрес доставки / Номер отделения',
-      addressPlh: 'г. Киев, отделение №15',
+      addressPlh: 'г. Кривой Рог, ул. Соборная, 10 / или отделение №15',
       summary: 'Ваш заказ',
       subtotal: 'Сумма товаров',
       shipping: 'Доставка',
-      shippingFree: 'Бесплатно',
-      shippingCost: '80 ₴',
-      shippingFreeCondition: 'При заказе от 1 500 ₴ доставка бесплатна!',
       total: 'Итого к оплате',
       orderBtn: 'Подтвердить заказ',
       confirmTitle: 'Подтверждение заказа',
@@ -138,16 +136,14 @@ export default function CartDrawer({
       methods: {
         np: 'Нова Пошта (у відділення)',
         up: 'Укрпошта',
+        courier: 'Доставка кур\'єром по місту Кривий Ріг',
         pickup: 'Самовивіз (Кривий Ріг)'
       },
       addressLabel: 'Адреса доставки / Номер відділення',
-      addressPlh: 'м. Київ, відділення №15',
+      addressPlh: 'м. Кривий Ріг, вул. Соборна, 10 / або відділення №15',
       summary: 'Ваше замовлення',
       subtotal: 'Сума товарів',
       shipping: 'Доставка',
-      shippingFree: 'Безкоштовно',
-      shippingCost: '80 ₴',
-      shippingFreeCondition: 'При замовленні від 1 500 ₴ доставка безкоштовна!',
       total: 'Всього до сплати',
       orderBtn: 'Підтвердити замовлення',
       confirmTitle: 'Підтвердження замовлення',
@@ -165,8 +161,7 @@ export default function CartDrawer({
   }[lang];
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
-  const shippingCost = (deliveryMethod === 'pickup' || subtotal >= 1500) ? 0 : 80;
-  const total = subtotal + shippingCost;
+  const total = subtotal;
 
   const handleSubmitOrder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,6 +174,8 @@ export default function CartDrawer({
     
     const deliveryStr = deliveryMethod === 'pickup'
       ? (lang === 'ru' ? 'Самовывоз (Кривой Рог)' : 'Самовивіз (Кривий Ріг)')
+      : deliveryMethod === 'courier'
+      ? (lang === 'ru' ? `Доставка курьером по г. Кривой Рог (${deliveryAddress})` : `Доставка кур'єром по місту Кривий Ріг (${deliveryAddress})`)
       : `${deliveryMethod === 'np' ? 'Нова Пошта' : 'Укрпошта'} - ${deliveryAddress}`;
 
     onPlaceOrder({
@@ -416,6 +413,7 @@ export default function CartDrawer({
                   {[
                     { id: 'np', icon: Truck },
                     { id: 'up', icon: Truck },
+                    { id: 'courier', icon: MapPin },
                     { id: 'pickup', icon: CheckCircle2 }
                   ].map(m => (
                     <label 
@@ -434,7 +432,8 @@ export default function CartDrawer({
                         onChange={() => setDeliveryMethod(m.id)}
                         className="accent-[#e02484]"
                       />
-                      <span>{t.methods[m.id as 'np' | 'up' | 'pickup']}</span>
+                      <m.icon className="w-4 h-4 text-[#e02484] shrink-0" />
+                      <span>{t.methods[m.id as keyof typeof t.methods]}</span>
                     </label>
                   ))}
                 </div>
@@ -456,22 +455,7 @@ export default function CartDrawer({
 
               {/* Order total summary */}
               <div className="p-4 bg-white rounded-xl border border-gray-200 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">{t.subtotal}</span>
-                  <span className="font-bold text-gray-900">{subtotal.toLocaleString('uk-UA')} грн</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">{t.shipping}</span>
-                  <span className="font-bold text-gray-900">
-                    {shippingCost === 0 ? t.shippingFree : t.shippingCost}
-                  </span>
-                </div>
-                {deliveryMethod !== 'pickup' && subtotal < 1500 && (
-                  <p className="text-[10px] text-[#e02484] font-sans leading-tight pt-1">
-                    {t.shippingFreeCondition}
-                  </p>
-                )}
-                <div className="flex justify-between pt-2 border-t border-gray-200 text-sm font-bold text-gray-900">
+                <div className="flex justify-between font-bold text-gray-900 text-sm">
                   <span>{t.total}</span>
                   <span>{total.toLocaleString('uk-UA')} грн</span>
                 </div>
@@ -543,7 +527,9 @@ export default function CartDrawer({
                 <strong className="text-gray-800 font-bold">
                   {deliveryMethod === 'pickup' 
                     ? (lang === 'ru' ? 'Самовывоз (Кривой Рог)' : 'Самовивіз (Кривий Ріг)')
-                    : `${deliveryMethod === 'np' ? 'Нова Почта' : 'Укрпочта'} - ${deliveryAddress}`}
+                    : deliveryMethod === 'courier'
+                    ? (lang === 'ru' ? `Доставка курьером по г. Кривой Рог (${deliveryAddress})` : `Доставка кур'єром по місту Кривий Ріг (${deliveryAddress})`)
+                    : `${deliveryMethod === 'np' ? 'Нова Пошта' : 'Укрпошта'} - ${deliveryAddress}`}
                 </strong>
               </p>
               {telegram && (

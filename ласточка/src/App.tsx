@@ -975,7 +975,7 @@ export default function App() {
       managerDesc: 'Отображает оптовую себестоимость и маржинальную прибыль по товарам.',
       managerActive: 'Режим менеджера',
       searchPlh: 'Поиск модного белья...',
-      filtersTitle: 'Фильтры каталога',
+      filtersTitle: 'Фильтры',
       priceLabel: 'Максимальная цена:',
       sizesLabel: 'Размеры:',
       colorsLabel: 'Палитра цветов:',
@@ -1013,7 +1013,7 @@ export default function App() {
       managerDesc: 'Відображає оптову собівартість та маржинальний прибуток по товарах.',
       managerActive: 'Режим менеджера',
       searchPlh: 'Пошук модної білизни...',
-      filtersTitle: 'Фільтри каталогу',
+      filtersTitle: 'Фільтри',
       priceLabel: 'Максимальна ціна:',
       sizesLabel: 'Розміри:',
       colorsLabel: 'Палітра кольорів:',
@@ -1243,25 +1243,6 @@ export default function App() {
               </button>
             ))}
           </div>
-
-          {/* Theme Switcher Toggler */}
-          <button
-            onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-            className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold bg-gray-200/60 hover:bg-gray-200/80 rounded transition-all text-gray-700 hover:text-gray-900 cursor-pointer shadow-sm select-none"
-            title={lang === 'ru' ? 'Сменить тему оформления' : 'Змінити тему оформлення'}
-          >
-            {theme === 'light' ? (
-              <>
-                <Moon className="w-3 h-3 text-[#e02484]" />
-                <span className="text-[9px] tracking-wide uppercase">{lang === 'ru' ? 'Ночь' : 'Ніч'}</span>
-              </>
-            ) : (
-              <>
-                <Sun className="w-3 h-3 text-[#d4af37]" />
-                <span className="text-[9px] tracking-wide uppercase">{lang === 'ru' ? 'День' : 'День'}</span>
-              </>
-            )}
-          </button>
         </div>
         <div className="flex items-center gap-4">
           {/* New Arrivals Button */}
@@ -1302,160 +1283,163 @@ export default function App() {
       </div>
 
       {/* 2. Main Header Row */}
-      <header className="bg-white px-4 md:px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-gray-200">
-        
+      <header className="bg-white px-4 md:px-8 py-3.5 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+          
+          {/* Top row inside header: Logo on left, Phone + Cart on right */}
+          <div className="flex items-center justify-between w-full md:w-auto gap-3">
             {/* Brand logo (Official Ukrainian logo image) */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-          <div className="flex items-center gap-3 md:gap-4 shrink-0">
-            <div className="flex flex-col cursor-pointer" onClick={() => { setActiveView('catalog'); setSelectedCategory('all'); setSelectedMenu('all'); setSearchQuery(''); }}>
-              <img 
-                src={BRAND_LOGO_BASE64} 
-                alt="Ластівка" 
-                className="h-12 md:h-16 w-auto object-contain select-none hover:opacity-90 transition-opacity"
-              />
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="flex flex-col cursor-pointer" onClick={() => { setActiveView('catalog'); setSelectedCategory('all'); setSelectedMenu('all'); setSearchQuery(''); }}>
+                <img 
+                  src={BRAND_LOGO_BASE64} 
+                  alt="Ластівка" 
+                  className="h-9 sm:h-11 md:h-12 w-auto object-contain select-none hover:opacity-90 transition-opacity"
+                />
+              </div>
+
+              {/* Database Setup Status Button & Badge */}
+              {managerMode && (
+                <button
+                  onClick={() => {
+                    if (managerMode) {
+                      setIsAdminOpen(true);
+                    } else {
+                      setAuthMode('login');
+                      setAuthError('');
+                      setIsAdminAuthModalOpen(true);
+                    }
+                  }}
+                  className={`p-1.5 py-0.5 rounded-full text-[10px] font-semibold flex items-center gap-1 transition-all border cursor-pointer ${
+                    dbStatus.mode === 'supabase' && dbStatus.connected
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
+                      : 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    dbStatus.mode === 'supabase' && dbStatus.connected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
+                  }`} />
+                  <span>{dbStatus.mode === 'supabase' && dbStatus.connected ? t.dbConnected : t.dbDemo}</span>
+                  <Database className="w-3 h-3 text-gray-500" />
+                </button>
+              )}
+            </div>
+
+            {/* Mobile Header Right Controls: Olga Phone & Cart */}
+            <div className="flex md:hidden flex-col items-end gap-1 shrink-0">
+              {/* Phone number */}
+              <div 
+                className="flex items-center gap-1.5 text-gray-700 select-none cursor-pointer"
+                onClick={() => {
+                  if (adminClicks >= 4) {
+                    if (!managerMode) {
+                      setAuthMode('login');
+                      setAuthError('');
+                      setIsAdminAuthModalOpen(true);
+                    }
+                    setAdminClicks(0);
+                  } else {
+                    setAdminClicks(prev => prev + 1);
+                    setTimeout(() => setAdminClicks(0), 3000);
+                  }
+                }}
+              >
+                <div className="p-1.5 bg-pink-50 text-[#e02484] rounded-full">
+                  <Phone className="w-3 h-3" />
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[11px] font-bold text-gray-800 font-sans tracking-tight">096-048-67-14</span>
+                  <span className="text-[9px] text-gray-400 font-medium">Ольга</span>
+                </div>
+              </div>
+
+              {/* Cart Widget Button */}
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="px-2.5 py-1 bg-pink-50 hover:bg-pink-100 text-gray-800 border border-pink-200 rounded-lg text-[10px] font-bold flex items-center gap-1.5 transition-all cursor-pointer select-none"
+              >
+                <ShoppingBag className="w-3.5 h-3.5 text-[#e02484]" />
+                <span>
+                  {lang === 'ru' ? 'Товаров' : 'Товарів'}: <strong className="text-[#e02484]">{cartItems.length}</strong> ({cartTotal.toLocaleString('uk-UA')} грн)
+                </span>
+              </button>
             </div>
           </div>
 
-          {/* Database Setup Status Button & Badge */}
-          {managerMode && (
-          <button
-            onClick={() => {
-              if (managerMode) {
-                setIsAdminOpen(true);
-              } else {
-                setAuthMode('login');
-                setAuthError('');
-                setIsAdminAuthModalOpen(true);
-              }
-            }}
-            className={`p-2 py-1 rounded-full text-[10px] font-semibold flex items-center gap-1.5 transition-all border cursor-pointer ${
-              dbStatus.mode === 'supabase' && dbStatus.connected
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
-                : 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
-            }`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${
-              dbStatus.mode === 'supabase' && dbStatus.connected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
-            }`} />
-            <span>{dbStatus.mode === 'supabase' && dbStatus.connected ? t.dbConnected : t.dbDemo}</span>
-            <Database className="w-3 h-3 text-gray-500" />
-          </button>
-          )}
+          {/* Desktop Right side controls: Olga Phone & Cart Indicators */}
+          <div className="hidden md:flex items-center gap-4 shrink-0">
+            {/* Contact phone number */}
+            <div 
+              className="flex items-center gap-2 text-gray-700 select-none cursor-pointer"
+              onClick={() => {
+                if (adminClicks >= 4) {
+                  if (!managerMode) {
+                    setAuthMode('login');
+                    setAuthError('');
+                    setIsAdminAuthModalOpen(true);
+                  }
+                  setAdminClicks(0);
+                } else {
+                  setAdminClicks(prev => prev + 1);
+                  setTimeout(() => setAdminClicks(0), 3000);
+                }
+              }}
+            >
+              <div className="p-2 bg-pink-50 text-[#e02484] rounded-full">
+                <Phone className="w-3.5 h-3.5" />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-xs font-bold text-gray-800 font-sans tracking-wide">096-048-67-14</span>
+                <span className="text-[10px] text-gray-400 font-medium">Ольга</span>
+              </div>
+            </div>
+
+            {/* Secret shopowner manager metrics toggler */}
+            {managerMode && (
+              <button
+                onClick={() => {
+                  setManagerMode(false);
+                  if (dbStatus.mode === 'supabase') {
+                    const client = getAuthClient();
+                    if (client) client.auth.signOut();
+                  } else {
+                    localStorage.removeItem('lastochka_admin_password');
+                  }
+                  triggerToast(lang === 'ru' ? 'Режим менеджера отключен' : 'Режим менеджера вимкнено', 'info');
+                }}
+                className="p-2 px-3 rounded-lg border text-xs font-semibold flex items-center gap-1.5 bg-[#e02484] border-[#e02484] text-white shadow-md font-bold transition-all cursor-pointer"
+                title={t.managerDesc}
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span>{t.managerActive}</span>
+              </button>
+            )}
+
+            {/* Cart Widget / Pill Indicator */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="px-4 py-2 bg-pink-50 hover:bg-pink-100 text-gray-800 border border-pink-200 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer select-none"
+            >
+              <ShoppingBag className="w-4 h-4 text-[#e02484]" />
+              <span>
+                {lang === 'ru' ? 'Товаров' : 'Товарів'}: <strong className="text-[#e02484]">{cartItems.length}</strong> ({cartTotal.toLocaleString('uk-UA')} грн)
+              </span>
+            </button>
+          </div>
+
         </div>
 
-        {/* Central Search bar exactly matching the screenshot */}
-        <div className="flex-1 max-w-lg mx-6 relative w-full md:w-auto">
+        {/* Central Search bar */}
+        <div className="max-w-7xl mx-auto mt-3 relative w-full">
           <input
             type="text"
             placeholder={lang === 'ru' ? 'Поиск модного белья...' : 'Пошук модної білизни...'}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full border border-gray-300 rounded-md pl-4 pr-10 py-2.5 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#e02484] focus:ring-1 focus:ring-[#e02484] bg-white transition-all font-sans"
+            className="w-full border border-gray-300 rounded-lg pl-4 pr-10 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#e02484] focus:ring-1 focus:ring-[#e02484] bg-white transition-all font-sans shadow-2xs"
           />
-          <button className="absolute right-3 top-3 text-gray-400 hover:text-[#e02484] cursor-pointer">
+          <button className="absolute right-3 top-2.5 text-gray-400 hover:text-[#e02484] cursor-pointer">
             <Search className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Right side controls: Olga Phone & Cart Indicators */}
-        <div className="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
-          
-          {/* Contact phone number from the screenshot */}
-          <div 
-            className="flex items-center gap-2 text-gray-700 select-none cursor-pointer"
-            onClick={() => {
-              if (adminClicks >= 4) {
-                if (!managerMode) {
-                  setAuthMode('login');
-                  setAuthError('');
-                  setIsAdminAuthModalOpen(true);
-                }
-                setAdminClicks(0);
-              } else {
-                setAdminClicks(prev => prev + 1);
-                setTimeout(() => setAdminClicks(0), 3000);
-              }
-            }}
-          >
-            <div className="p-2 bg-pink-50 text-[#e02484] rounded-full">
-              <Phone className="w-3.5 h-3.5" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-bold text-gray-800 font-sans tracking-wide">096-048-67-14</span>
-              <span className="text-[10px] text-gray-400 font-medium">Ольга</span>
-            </div>
-          </div>
-
-          {/* Secret shopowner manager metrics toggler */}
-          {managerMode && (
-          <button
-            onClick={() => {
-              if (!managerMode) {
-                if (dbStatus.mode === 'supabase') {
-                  const client = getAuthClient();
-                  if (client) {
-                    client.auth.getSession().then(({ data: { session } }) => {
-                      if (session) {
-                        setManagerMode(true);
-                        triggerToast(lang === 'ru' ? 'Режим менеджера активен' : 'Режим менеджера активний', 'info');
-                      } else {
-                        setAuthMode('login');
-                        setAuthError('');
-                        setIsAdminAuthModalOpen(true);
-                      }
-                    });
-                  } else {
-                    setAuthMode('login');
-                    setAuthError('');
-                    setIsAdminAuthModalOpen(true);
-                  }
-                } else {
-                  const savedPwd = localStorage.getItem('lastochka_admin_password');
-                  if (savedPwd) {
-                    setManagerMode(true);
-                    triggerToast(lang === 'ru' ? 'Режим менеджера активен' : 'Режим менеджера активний', 'info');
-                  } else {
-                    setAuthMode('login');
-                    setAuthError('');
-                    setIsAdminAuthModalOpen(true);
-                  }
-                }
-              } else {
-                setManagerMode(false);
-                if (dbStatus.mode === 'supabase') {
-                  const client = getAuthClient();
-                  if (client) {
-                    client.auth.signOut();
-                  }
-                } else {
-                  localStorage.removeItem('lastochka_admin_password');
-                }
-                triggerToast(lang === 'ru' ? 'Режим менеджера отключен' : 'Режим менеджера вимкнено', 'info');
-              }
-            }}
-            className={`p-2 px-3 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              managerMode 
-                ? 'bg-[#e02484] border-[#e02484] text-white shadow-md font-bold' 
-                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`}
-            title={t.managerDesc}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{t.managerActive}</span>
-          </button>
-          )}
-
-
-
-          {/* Cart Widget / Pill Indicator precisely styled */}
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 border border-gray-200/80 rounded-md text-xs font-bold flex items-center gap-2 transition-all cursor-pointer select-none"
-          >
-            <ShoppingBag className="w-4 h-4 text-[#e02484]" />
-            <span>
-              {lang === 'ru' ? 'Товаров' : 'Товарів'}: <strong className="text-[#e02484]">{cartItems.length}</strong> ({cartTotal.toLocaleString('uk-UA')} грн)
-            </span>
           </button>
         </div>
       </header>
@@ -1739,11 +1723,15 @@ export default function App() {
 
       {activeView === 'catalog' ? (
         <>
-      {/* 4.5 Mobile Sticky Category Bar (Fixed to top of phone screen on scroll) */}
-      <div className="lg:hidden sticky top-0 z-40 bg-white/98 backdrop-blur-md border-b border-pink-200 shadow-md transition-all">
-        <div className="p-2.5 px-4 flex items-center justify-between gap-2">
+      {/* 4.5 Mobile Sticky Controls Bar */}
+      <div className="lg:hidden sticky top-0 z-40 bg-white/98 backdrop-blur-md border-b border-pink-200 shadow-md transition-all p-2.5 px-4 space-y-2">
+        {/* Row 1: Categories dropdown & total products count */}
+        <div className="flex items-center justify-between gap-2">
           <button
-            onClick={() => setIsMobileCategoryOpen(!isMobileCategoryOpen)}
+            onClick={() => {
+              setIsMobileCategoryOpen(!isMobileCategoryOpen);
+              if (showFilters) setShowFilters(false);
+            }}
             className="flex items-center gap-2 bg-pink-50 hover:bg-pink-100 text-gray-900 border border-pink-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#e02484]" />
@@ -1760,6 +1748,29 @@ export default function App() {
           <div className="text-[11px] font-bold text-gray-500 font-mono shrink-0">
             {filteredProducts.length} {lang === 'ru' ? 'тов.' : 'тов.'}
           </div>
+        </div>
+
+        {/* Row 2: Filters button & Reset all button */}
+        <div className="flex items-center justify-between gap-2">
+          <button
+            onClick={() => {
+              setShowFilters(!showFilters);
+              if (isMobileCategoryOpen) setIsMobileCategoryOpen(false);
+            }}
+            className="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#e02484]" />
+            <span>{t.filtersTitle}</span>
+            <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${showFilters ? 'rotate-180 text-[#e02484]' : ''}`} />
+          </button>
+
+          <button
+            onClick={resetFilters}
+            className="flex items-center gap-1.5 text-xs font-bold text-[#e02484] hover:text-[#c0146f] bg-pink-50/60 hover:bg-pink-100/80 px-2.5 py-1.5 rounded-xl border border-pink-100 transition-all cursor-pointer active:scale-95"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>{lang === 'ru' ? 'Сбросить все' : 'Скинути все'}</span>
+          </button>
         </div>
 
         {/* Dropdown Category Menu Drawer */}
@@ -2434,6 +2445,25 @@ export default function App() {
                 <Globe className="w-3.5 h-3.5 shrink-0 animate-pulse text-[#e02484]" />
                 <span>{lang === 'ru' ? 'Веб-версия' : 'Веб-версія'}</span>
               </a>
+
+              {/* Theme Switcher Button in Footer */}
+              <button
+                onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold bg-white hover:bg-pink-50 text-gray-700 hover:text-[#e02484] rounded-full border border-pink-200 shadow-sm hover:shadow hover:scale-105 active:scale-95 transition-all cursor-pointer select-none tracking-wide"
+                title={lang === 'ru' ? 'Сменить тему оформления' : 'Змінити тему оформлення'}
+              >
+                {theme === 'light' ? (
+                  <>
+                    <Moon className="w-3.5 h-3.5 text-[#e02484]" />
+                    <span>{lang === 'ru' ? 'Тёмная тема' : 'Темна тема'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Sun className="w-3.5 h-3.5 text-[#d4af37]" />
+                    <span>{lang === 'ru' ? 'Светлая тема' : 'Світла тема'}</span>
+                  </>
+                )}
+              </button>
             </div>
 
             <p className="text-[10px] text-gray-500 font-sans mt-3.5 font-normal">

@@ -243,7 +243,7 @@ export default function App() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('default'); // 'default', 'priceAsc', 'priceDesc', 'stock'
-  const [showFilters, setShowFilters] = useState<boolean>(true);
+  const [showFilters, setShowFilters] = useState<boolean>(false);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(true);
   const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState<boolean>(false);
   const [expandedCategoryKeys, setExpandedCategoryKeys] = useState<Set<string>>(new Set());

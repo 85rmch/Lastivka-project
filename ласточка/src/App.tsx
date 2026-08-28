@@ -246,7 +246,7 @@ export default function App() {
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(true);
   const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState<boolean>(false);
-  const [expandedCategoryKeys, setExpandedCategoryKeys] = useState<Set<string>>(new Set(['bras', 'panties']));
+  const [expandedCategoryKeys, setExpandedCategoryKeys] = useState<Set<string>>(new Set());
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Reset page when search or filters change
@@ -1760,40 +1760,6 @@ export default function App() {
           <div className="text-[11px] font-bold text-gray-500 font-mono shrink-0">
             {filteredProducts.length} {lang === 'ru' ? 'тов.' : 'тов.'}
           </div>
-        </div>
-
-        {/* Quick horizontal category pills */}
-        <div className="px-3 pb-2 overflow-x-auto scrollbar-hide flex items-center gap-1.5 border-t border-pink-50 pt-1.5">
-          {CATEGORIES.map(cat => {
-            const isSel = selectedCategory === cat.key;
-            return (
-              <button
-                key={cat.key}
-                onClick={() => {
-                  setSelectedCategory(cat.key);
-                  const matchingMenu = Object.keys(MENU_TRANSLATIONS).find(m => getCategoryKeyFromMenu(m) === cat.key);
-                  setSelectedMenu(matchingMenu || 'all');
-                  setSelectedPantiesType(0);
-                  setSelectedBraType(0);
-                  setSelectedPajamaType(0);
-                  setSelectedSwimwearType(0);
-                  setSelectedSetType(0);
-                  setSelectedThermalType(0);
-                  setSelectedEroticType(0);
-                  setSelectedToysType(0);
-                  setCurrentPage(1);
-                }}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
-                  isSel 
-                    ? 'bg-[#e02484] text-white shadow-2xs' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-pink-50 hover:text-[#e02484]'
-                }`}
-              >
-                {renderCategoryIcon(cat.key, `w-3 h-3 ${isSel ? 'text-white' : 'text-gray-500'}`)}
-                <span>{lang === 'ru' ? cat.labelRu : cat.labelUa}</span>
-              </button>
-            );
-          })}
         </div>
 
         {/* Dropdown Category Menu Drawer */}

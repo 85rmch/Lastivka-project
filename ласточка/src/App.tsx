@@ -945,21 +945,9 @@ export default function App() {
           </svg>
         );
       case 'panties':
-        return (
-          <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="46" fill="currentColor" />
-            <path d="M 22 36 C 32 41.5, 68 41.5, 78 36 C 80.5 40, 73.5 49, 56 72 L 44 72 C 26.5 49, 19.5 40, 22 36 Z" fill="white" />
-          </svg>
-        );
-      case 'thermals': return <Flame className={className} />;
       case 'socks':
-        return (
-          <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="50" cy="50" r="46" fill="currentColor" />
-            <path d="M 76 17 C 78 20, 79 26, 78 30 C 72 35, 60 34, 52 30 C 49 28, 48 29, 48 31 C 48 36, 52 47, 49 59 C 46 68, 39 74, 29 79 C 26 80.5, 26 83, 31 83 C 41 83, 47 80, 48 76 C 50 70, 54 59, 58 50 C 62 41, 70 33, 76 29 C 78 26, 78 20, 76 17 Z" fill="white" />
-            <path d="M 32 38 L 41 38 L 40 50 C 40 54, 38 56, 31 57 L 22 57 C 19 57, 19 53, 23 50 L 32 48 Z" fill="white" />
-          </svg>
-        );
+        return <Sparkles className={className} />;
+      case 'thermals': return <Flame className={className} />;
       case 'jeggings': return <Layers className={className} />;
       case 'games': return <Gamepad2 className={className} />;
       default: return <Sparkles className={className} />;

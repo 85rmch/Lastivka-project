@@ -4,14 +4,14 @@ export const CATEGORIES: CategoryInfo[] = [
   { key: 'all', labelRu: 'Все товары', labelUa: 'Всі товари', icon: 'Sparkles' },
   { key: 'new', labelRu: 'Новинки', labelUa: 'Новинки', icon: 'Star' },
   { key: 'bras', labelRu: 'Бюстгальтеры', labelUa: 'БЮСТГАЛЬТЕРИ', icon: 'Heart' },
-  { key: 'panties', labelRu: 'Трусики', labelUa: 'ТРУСИКИ', icon: 'Heart' },
-  { key: 'home', labelRu: 'Одежда для дома', labelUa: 'ОДЯГ ДЛЯ ДОМУ', icon: 'Shirt' },
+  { key: 'panties', labelRu: 'Трусики', labelUa: 'ТРУСИКИ', icon: 'Sparkles' },
+  { key: 'home', labelRu: 'Одежда для дома', labelUa: 'ОДЯГ ДЛЯ ДОМУ', icon: 'Sparkles' },
   { key: 'swimwear', labelRu: 'Купальники', labelUa: 'КУПАЛЬНИКИ', icon: 'Sun' },
   { key: 'sets', labelRu: 'Комплекты белья', labelUa: 'КОМПЛЕКТИ БІЛИЗНИ', icon: 'Layers' },
   { key: 'thermals', labelRu: 'Термобелье', labelUa: 'ТЕРМОБІЛИЗНА', icon: 'Flame' },
   { key: 'erotic', labelRu: 'Эротическое белье', labelUa: 'ЕРОТИЧНА БІЛИЗНА', icon: 'Zap' },
   { key: 'toys_accessories', labelRu: 'Игрушки и аксессуары', labelUa: 'ІГРАШКИ ТА АКСЕСУАРИ', icon: 'Gamepad2' },
-  { key: 'socks', labelRu: 'Носки', labelUa: 'ШКАРПЕТКИ', icon: 'Footprints' },
+  { key: 'socks', labelRu: 'Носки', labelUa: 'ШКАРПЕТКИ', icon: 'Sparkles' },
 ];
 
 export const COLOR_OPTIONS: string[] = [

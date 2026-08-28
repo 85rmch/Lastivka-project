@@ -2340,42 +2340,6 @@ export default function App() {
             </>
           )}
 
-          {/* Orders History List section - Displayed if orders have been placed inside this local simulation */}
-          {managerMode && orders.length > 0 && (
-            <div className="mt-16 bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
-              <h3 className="font-sans font-bold text-gray-900 text-base tracking-tight flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-[#e02484]" />
-                {t.ordersHistory}
-              </h3>
-
-              <div className="divide-y divide-gray-100">
-                {orders.map(ord => (
-                  <div key={ord.id} className="py-4 first:pt-0 last:pb-0 flex flex-col md:flex-row items-baseline md:items-center justify-between gap-3 text-xs font-sans">
-                    <div>
-                      <p className="font-mono font-bold text-[#e02484] text-sm">{ord.id}</p>
-                      <p className="text-[11px] text-gray-500 mt-0.5">{t.orderDate} {ord.date}</p>
-                      <p className="text-[11px] text-gray-500 mt-1">
-                        <strong>{lang === 'ru' ? 'Получатель:' : 'Отримувач:'}</strong> {ord.customerInfo.name} | {ord.customerInfo.phone}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-6 self-end md:self-auto font-sans text-xs">
-                      <div>
-                        <span className="text-gray-400 mr-1">{t.orderTotal}</span>
-                        <strong className="text-gray-900 text-sm font-bold">
-                          {ord.total.toLocaleString('uk-UA')} грн
-                        </strong>
-                      </div>
-                      <span className="px-2.5 py-1 bg-pink-50 text-[#e02484] border border-pink-200 rounded-lg font-bold font-sans">
-                        {t.orderStatuses[ord.status]}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
         </div>
 
       </main>

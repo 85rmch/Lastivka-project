@@ -243,7 +243,7 @@ export default function App() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('default'); // 'default', 'priceAsc', 'priceDesc', 'stock'
-  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [showFilters, setShowFilters] = useState<boolean>(true);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState<boolean>(true);
   const [isMobileCategoryOpen, setIsMobileCategoryOpen] = useState<boolean>(false);
   const [expandedCategoryKeys, setExpandedCategoryKeys] = useState<Set<string>>(new Set());
@@ -953,6 +953,88 @@ export default function App() {
       default: return <Sparkles className={className} />;
     }
   };
+
+  const renderFilterControls = (isCompact = false) => (
+    <div className={`grid grid-cols-1 ${isCompact ? 'gap-3.5' : 'sm:grid-cols-2 lg:grid-cols-4 gap-4'}`}>
+      {/* Price slider filter */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-xs text-gray-600 font-medium">
+          <span>{t.priceLabel}</span>
+          <span className="font-bold text-[#e02484] font-mono">{maxPrice} грн</span>
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={maxProductPrice || 1200}
+          step={10}
+          value={maxPrice}
+          onChange={e => setMaxPrice(Number(e.target.value))}
+          className="w-full accent-[#e02484] bg-gray-200 h-1.5 rounded-lg cursor-pointer"
+        />
+        <div className="flex justify-between text-[9px] text-gray-400 font-mono">
+          <span>0 грн</span>
+          <span>{maxProductPrice} грн</span>
+        </div>
+      </div>
+
+      {/* Sizes selection dropdown */}
+      {allUniqueSizes.length > 0 && (
+        <div className="space-y-1.5">
+          <label className="block text-xs font-semibold text-gray-600">{t.sizesLabel}</label>
+          <select
+            className="w-full text-xs p-2 rounded-lg border border-gray-300 focus:outline-none focus:border-[#e02484] bg-white cursor-pointer font-sans"
+            value={selectedSizes.length === 1 ? selectedSizes[0] : ''}
+            onChange={(e) => {
+              if (e.target.value === '') {
+                setSelectedSizes([]);
+              } else {
+                setSelectedSizes([e.target.value]);
+              }
+            }}
+          >
+            <option value="">{lang === 'ru' ? 'Все размеры' : 'Всі розміри'}</option>
+            {allUniqueSizes.map(sz => (
+              <option key={sz} value={sz}>{sz}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Colors picker selection */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-semibold text-gray-600">{t.colorsLabel}</label>
+        <select
+          value={selectedColor}
+          onChange={e => setSelectedColor(e.target.value)}
+          className="w-full text-xs p-2 bg-white border border-gray-300 text-gray-800 focus:border-[#e02484] rounded-lg focus:outline-none transition-all font-sans cursor-pointer"
+        >
+          <option value="all">{lang === 'ru' ? 'Все цвета' : 'Всі кольори'}</option>
+          {OFFICIAL_COLORS.map(c => (
+            <option key={c.ua} value={c.ua}>
+              {lang === 'ru' ? c.ru : c.ua}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Sorting controls */}
+      <div className="space-y-1.5">
+        <label className="block text-xs font-semibold text-gray-600">{t.sortLabel}</label>
+        <div className="relative">
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="w-full text-xs p-2 bg-white border border-gray-300 text-gray-800 focus:border-[#e02484] rounded-lg focus:outline-none transition-all font-sans pr-8 appearance-none cursor-pointer"
+          >
+            <option value="default">{t.sortOptions.default}</option>
+            <option value="priceAsc">{t.sortOptions.priceAsc}</option>
+            <option value="priceDesc">{t.sortOptions.priceDesc}</option>
+          </select>
+          <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-2.5 pointer-events-none" />
+        </div>
+      </div>
+    </div>
+  );
 
   const t = {
     ru: {
@@ -1713,29 +1795,29 @@ export default function App() {
         <>
       {/* 4.5 Mobile Sticky Controls Bar */}
       <div className="lg:hidden sticky top-0 z-40 bg-white/98 backdrop-blur-md border-b border-pink-200 shadow-md transition-all p-2.5 px-4 space-y-2">
-        {/* Row 1: Categories dropdown & total products count */}
+        {/* Row 1: Categories dropdown */}
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => {
               setIsMobileCategoryOpen(!isMobileCategoryOpen);
               if (showFilters) setShowFilters(false);
             }}
-            className="flex items-center gap-2 bg-pink-50 hover:bg-pink-100 text-gray-900 border border-pink-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
+            className="w-full flex items-center justify-between gap-2 bg-pink-50 hover:bg-pink-100 text-gray-900 border border-pink-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs active:scale-95"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#e02484]" />
-            <span>{lang === 'ru' ? 'Категории товаров' : 'Категорії товарів'}</span>
-            <span className="bg-[#e02484] text-white text-[10px] font-bold px-2 py-0.5 rounded-full max-w-[120px] truncate">
-              {selectedCategory === 'all' 
-                ? (lang === 'ru' ? 'Все' : 'Усі') 
-                : (CATEGORIES.find(c => c.key === selectedCategory)?.[lang === 'ru' ? 'labelRu' : 'labelUa'] || '')
-              }
-            </span>
-            <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isMobileCategoryOpen ? 'rotate-180 text-[#e02484]' : ''}`} />
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-[#e02484]" />
+              <span>{lang === 'ru' ? 'Категории товаров' : 'Категорії товарів'}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="bg-[#e02484] text-white text-[10px] font-bold px-2 py-0.5 rounded-full max-w-[120px] truncate">
+                {selectedCategory === 'all' 
+                  ? (lang === 'ru' ? 'Все' : 'Усі') 
+                  : (CATEGORIES.find(c => c.key === selectedCategory)?.[lang === 'ru' ? 'labelRu' : 'labelUa'] || '')
+                }
+              </span>
+              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isMobileCategoryOpen ? 'rotate-180 text-[#e02484]' : ''}`} />
+            </div>
           </button>
-
-          <div className="text-[11px] font-bold text-gray-500 font-mono shrink-0">
-            {filteredProducts.length} {lang === 'ru' ? 'тов.' : 'тов.'}
-          </div>
         </div>
 
         {/* Row 2: Filters button & Reset all button */}
@@ -1760,6 +1842,21 @@ export default function App() {
             <span>{lang === 'ru' ? 'Сбросить все' : 'Скинути все'}</span>
           </button>
         </div>
+
+        {/* Dropdown Filters Drawer on Mobile */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="border-t border-pink-200 bg-white max-h-[70vh] overflow-y-auto p-3.5 shadow-xl space-y-3"
+            >
+              {renderFilterControls(true)}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Dropdown Category Menu Drawer */}
         <AnimatePresence>
@@ -1892,10 +1989,10 @@ export default function App() {
 
         
         {/* Left column sidebar for searching, filter specs, pricing bounds */}
-        <div className="hidden lg:block lg:col-span-1 space-y-6">
+        <div className="hidden lg:block lg:col-span-1 space-y-6 sticky top-16 self-start max-h-[calc(100vh-5rem)] overflow-y-auto scrollbar-hide pr-1">
           
           {/* Dynamic Category Navigation pills */}
-          <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm space-y-4 sticky top-16 z-10 backdrop-blur-md bg-white/98 max-h-[85vh] overflow-y-auto scrollbar-hide">
+          <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
             <button 
               onClick={() => setIsCategoriesExpanded(!isCategoriesExpanded)}
               className="w-full font-sans font-bold text-gray-900 text-sm tracking-tight border-b border-gray-100 pb-2 flex items-center justify-between cursor-pointer focus:outline-none"
@@ -2057,88 +2154,9 @@ export default function App() {
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  className="flex flex-col gap-5 overflow-hidden"
+                  className="overflow-hidden"
                 >
-                  {/* Internal Filter Controls Container */}
-
-            {/* Price slider filter */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
-                <span>{t.priceLabel}</span>
-                <span className="font-bold text-gray-800 font-mono">{maxPrice} грн</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={maxProductPrice || 1200}
-                step={10}
-                value={maxPrice}
-                onChange={e => setMaxPrice(Number(e.target.value))}
-                className="w-full accent-[#e02484] bg-gray-200 h-1 rounded-lg cursor-pointer"
-              />
-              <div className="flex justify-between text-[9px] text-gray-400 font-mono">
-                <span>0 грн</span>
-                <span>{maxProductPrice} грн</span>
-              </div>
-            </div>
-
-            {/* Sizes selection dropdown */}
-            {allUniqueSizes.length > 0 && (
-              <div className="space-y-2 pt-2 border-t border-gray-100">
-                <label className="block text-xs font-semibold text-gray-500 mb-1.5">{t.sizesLabel}</label>
-                <select
-                  className="w-full text-xs p-2 rounded-md border border-gray-200 focus:outline-none focus:border-[#e02484] bg-white cursor-pointer"
-                  value={selectedSizes.length === 1 ? selectedSizes[0] : ''}
-                  onChange={(e) => {
-                    if (e.target.value === '') {
-                      setSelectedSizes([]);
-                    } else {
-                      setSelectedSizes([e.target.value]);
-                    }
-                  }}
-                >
-                  <option value="">{lang === 'ru' ? 'Все размеры' : 'Всі розміри'}</option>
-                  {allUniqueSizes.map(sz => (
-                    <option key={sz} value={sz}>{sz}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Colors picker selection */}
-            <div className="space-y-2 pt-2 border-t border-gray-100">
-              <label className="block text-xs font-semibold text-gray-500 mb-1.5">{t.colorsLabel}</label>
-              <select
-                value={selectedColor}
-                onChange={e => setSelectedColor(e.target.value)}
-                className="w-full p-2 bg-white border border-gray-300 text-gray-800 focus:border-[#e02484] rounded-lg text-xs focus:outline-none transition-all font-sans"
-              >
-                <option value="all">{lang === 'ru' ? 'Все цвета' : 'Всі кольори'}</option>
-                {OFFICIAL_COLORS.map(c => (
-                  <option key={c.ua} value={c.ua}>
-                    {lang === 'ru' ? c.ru : c.ua}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sorting controls */}
-            <div className="space-y-2 pt-2 border-t border-gray-100">
-              <label className="block text-xs font-semibold text-gray-500 mb-1.5">{t.sortLabel}</label>
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={e => setSortBy(e.target.value)}
-                  className="w-full p-2 bg-white border border-gray-300 text-gray-800 focus:border-[#e02484] rounded-lg text-xs focus:outline-none transition-all font-sans pr-8 appearance-none"
-                >
-                  <option value="default">{t.sortOptions.default}</option>
-                  <option value="priceAsc">{t.sortOptions.priceAsc}</option>
-                  <option value="priceDesc">{t.sortOptions.priceDesc}</option>
-                </select>
-                <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-3 pointer-events-none" />
-              </div>
-            </div>
-            
+                  {renderFilterControls(true)}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -2148,25 +2166,14 @@ export default function App() {
         {/* Right column representing actual product cards grids with counts */}
         <div id="catalog-section" className="lg:col-span-3 space-y-6">
           
-          {/* Active stats, filters or source details */}
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold text-gray-500 tracking-wide">
-              {selectedCategory === ('favorites' as any) 
-                ? (lang === 'ru' ? 'Избранные товары' : 'Обрані товари')
-                : t.productsCount.replace('{count}', String(sortedProducts.length))}
-            </p>
-
-            {/* If any filter active, display reset indicator */}
-            {(searchQuery || selectedCategory !== 'all' || selectedMenu !== 'all' || maxPrice < maxProductPrice || selectedSizes.length > 0 || selectedColor !== 'all') && (
-              <button
-                onClick={resetFilters}
-                className="text-[11px] font-bold text-[#e02484] hover:text-[#c0146f] transition-all flex items-center gap-1 cursor-pointer"
-              >
-                <RotateCcw className="w-3 h-3" />
-                {lang === 'ru' ? 'Сбросить все' : 'Скинути все'}
-              </button>
-            )}
-          </div>
+          {/* Active stats bar above product cards (for favorites view) */}
+          {selectedCategory === ('favorites' as any) && (
+            <div className="bg-white p-3.5 px-4 rounded-xl border border-gray-200 shadow-2xs flex items-center justify-between gap-3 flex-wrap">
+              <p className="text-xs font-bold text-gray-500 tracking-wide">
+                {lang === 'ru' ? 'Избранные товары' : 'Обрані товари'}
+              </p>
+            </div>
+          )}
 
           {/* Loading state indicator spinner */}
           {loading ? (

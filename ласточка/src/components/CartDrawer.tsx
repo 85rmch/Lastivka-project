@@ -109,9 +109,9 @@ export default function CartDrawer({
       confirmTitle: 'Подтверждение заказа',
       confirmDesc: 'Пожалуйста, проверьте правильность введенных данных перед оформлением заказа:',
       confirmYes: 'Да, подтверждаю',
-      confirmNo: 'Проверить данные',
+      confirmNo: 'Изменить данные',
       successTitle: 'Заказ успешно оформлен!',
-      successDesc: 'Спасибо за заказ! Наш менеджер свяжется с вами в ближайшее время по указанному телефону для подтверждения деталей.',
+      successDesc: `Спасибо за заказ!\nМне очень приятно, что вы выбрали именно мой магазин. В скором времени я свяжусь с вами, чтобы подтвердить наличие и согласовать детали.\n\nОля Ласточка,  096-048-67-14`,
       orderNum: 'Номер вашего заказа',
       continueBtn: 'Продолжить покупки',
       tgNotifyTitle: 'Уведомления в Telegram',
@@ -149,9 +149,9 @@ export default function CartDrawer({
       confirmTitle: 'Підтвердження замовлення',
       confirmDesc: 'Будь ласка, перевірте правильність введених даних перед оформленням замовлення:',
       confirmYes: 'Так, підтверджую',
-      confirmNo: 'Перевірити дані',
+      confirmNo: 'Змінити дані',
       successTitle: 'Замовлення успішно оформлено!',
-      successDesc: 'Дякуємо за замовлення! Наш менеджер зв\'яжеться з вами найближчим часом за вказаним телефоном для підтвердження деталей.',
+      successDesc: `Дякую за замовлення!\nМені дуже приємно, що ви обрали саме мій магазин. Незабаром я зв'яжусь з вами, щоб підтвердити наявність та узгодити деталі.\n\nОля Ластівка,  096-048-67-14`,
       orderNum: 'Номер вашого замовлення',
       continueBtn: 'Продовжити покупки',
       tgNotifyTitle: 'Сповіщення в Telegram',
@@ -241,7 +241,7 @@ export default function CartDrawer({
             
             <div className="space-y-2">
               <h4 className="text-xl font-bold text-gray-900">{t.successTitle}</h4>
-              <p className="text-xs text-gray-500 leading-relaxed font-sans">{t.successDesc}</p>
+              <p className="text-xs text-gray-600 leading-relaxed font-sans whitespace-pre-line">{t.successDesc}</p>
             </div>
 
             <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 w-full font-mono text-xs">
